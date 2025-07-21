@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import Header from './components/Header.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import ClientList from './components/ClientList.jsx';
-import AssetList from './components/AssetList.jsx';
-import ContractList from './components/ContractList.jsx';
-import PaymentList from './components/PaymentList.jsx';
+import { ErrorProvider } from './context/ErrorContext';
+import Header from './components/Header';
+import Dashboard from './pages/Dashboard';
+import ClientList from './components/ClientList';
+import AssetList from './components/AssetList';
+import ContractList from './components/ContractList';
+import PaymentList from './components/PaymentList';
 
-function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const renderContent = () => {
@@ -27,12 +28,20 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       <main>
         {renderContent()}
       </main>
-    </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ErrorProvider>
+      <AppContent />
+    </ErrorProvider>
   );
 }
 

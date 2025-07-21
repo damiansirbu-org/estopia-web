@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { clientService } from '../services/api.js';
+import { useError } from '../context/ErrorContext.jsx';
 
 function ClientList() {
+  const { withErrorHandling, loading } = useError();
   const [clients, setClients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [newClient, setNewClient] = useState({
@@ -17,33 +17,27 @@ function ClientList() {
   const [editData, setEditData] = useState({});
 
   useEffect(() => {
-    const loadClients = async () => {
-      try {
-        const data = await clientService.getAllClients();
-        setClients(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     loadClients();
   }, []);
+
+  const loadClients = async () => {
+    await withErrorHandling(async () => {
+      const data = await clientService.getAllClients();
+      setClients(data);
+    });
+  };
 
   const handleAddClient = () => {
     setIsAdding(true);
   };
 
   const handleSaveClient = async () => {
-    try {
+    await withErrorHandling(async () => {
       const savedClient = await clientService.createClient(newClient);
       setClients([...clients, savedClient]);
       setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
       setIsAdding(false);
-    } catch (err) {
-      setError(err.message);
-    }
+    }, 'Client created successfully!');
   };
 
   const handleCancelAdd = () => {
@@ -57,14 +51,12 @@ function ClientList() {
   };
 
   const handleSaveEdit = async () => {
-    try {
+    await withErrorHandling(async () => {
       const updatedClient = await clientService.updateClient(editingId, editData);
       setClients(clients.map(c => c.id === editingId ? updatedClient : c));
       setEditingId(null);
       setEditData({});
-    } catch (err) {
-      setError(err.message);
-    }
+    }, 'Client updated successfully!');
   };
 
   const handleCancelEdit = () => {
@@ -74,28 +66,25 @@ function ClientList() {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
-      try {
+      await withErrorHandling(async () => {
         await clientService.deleteClient(id);
         setClients(clients.filter(c => c.id !== id));
-      } catch (err) {
-        setError(err.message);
-      }
+      }, 'Client deleted successfully!');
     }
   };
-
-  if (loading) return <div className="p-6">Loading clients...</div>;
-  if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
   return (
     <div className="p-6">
       <div className="flex justify-start items-center mb-6">
         <button 
           onClick={handleAddClient}
-          className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+          disabled={loading}
+          className="text-blue-600 hover:text-blue-900 text-sm font-medium disabled:opacity-50"
         >
           + Add Client
         </button>
       </div>
+
       <div className="bg-white rounded-lg shadow">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -120,6 +109,7 @@ function ClientList() {
                     onChange={(e) => setNewClient({...newClient, firstName: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="First name"
+                    disabled={loading}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -129,6 +119,7 @@ function ClientList() {
                     onChange={(e) => setNewClient({...newClient, lastName: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Last name"
+                    disabled={loading}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -138,6 +129,7 @@ function ClientList() {
                     onChange={(e) => setNewClient({...newClient, email: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Email"
+                    disabled={loading}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -147,6 +139,7 @@ function ClientList() {
                     onChange={(e) => setNewClient({...newClient, phoneNumber: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Phone"
+                    disabled={loading}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -156,18 +149,21 @@ function ClientList() {
                     onChange={(e) => setNewClient({...newClient, address: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Address"
+                    disabled={loading}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <button 
                     onClick={handleSaveClient}
-                    className="text-green-600 hover:text-green-900 mr-3 font-medium"
+                    disabled={loading}
+                    className="text-green-600 hover:text-green-900 mr-3 font-medium disabled:opacity-50"
                   >
-                    Save
+                    {loading ? 'Saving...' : 'Save'}
                   </button>
                   <button 
                     onClick={handleCancelAdd}
-                    className="text-gray-600 hover:text-gray-900 font-medium"
+                    disabled={loading}
+                    className="text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -184,6 +180,7 @@ function ClientList() {
                       value={editData.firstName}
                       onChange={(e) => setEditData({...editData, firstName: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      disabled={loading}
                     />
                   ) : (
                     <span className="text-sm font-medium text-gray-900">{client.firstName}</span>
@@ -196,6 +193,7 @@ function ClientList() {
                       value={editData.lastName}
                       onChange={(e) => setEditData({...editData, lastName: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      disabled={loading}
                     />
                   ) : (
                     <span className="text-sm font-medium text-gray-900">{client.lastName}</span>
@@ -208,6 +206,7 @@ function ClientList() {
                       value={editData.email}
                       onChange={(e) => setEditData({...editData, email: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      disabled={loading}
                     />
                   ) : (
                     <span className="text-sm text-gray-500">{client.email}</span>
@@ -220,6 +219,7 @@ function ClientList() {
                       value={editData.phoneNumber}
                       onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      disabled={loading}
                     />
                   ) : (
                     <span className="text-sm text-gray-500">{client.phoneNumber}</span>
@@ -232,6 +232,7 @@ function ClientList() {
                       value={editData.address}
                       onChange={(e) => setEditData({...editData, address: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      disabled={loading}
                     />
                   ) : (
                     <span className="text-sm text-gray-500">{client.address || '-'}</span>
@@ -242,13 +243,15 @@ function ClientList() {
                     <>
                       <button 
                         onClick={handleSaveEdit}
-                        className="text-green-600 hover:text-green-900 mr-3 font-medium"
+                        disabled={loading}
+                        className="text-green-600 hover:text-green-900 mr-3 font-medium disabled:opacity-50"
                       >
-                        Save
+                        {loading ? 'Saving...' : 'Save'}
                       </button>
                       <button 
                         onClick={handleCancelEdit}
-                        className="text-gray-600 hover:text-gray-900 font-medium"
+                        disabled={loading}
+                        className="text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
                       >
                         Cancel
                       </button>
@@ -257,13 +260,15 @@ function ClientList() {
                     <>
                       <button 
                         onClick={() => handleEdit(client)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        disabled={loading}
+                        className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
                       >
                         Edit
                       </button>
                       <button 
                         onClick={() => handleDelete(client.id)}
-                        className="text-red-600 hover:text-red-900"
+                        disabled={loading}
+                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
                       >
                         Delete
                       </button>
