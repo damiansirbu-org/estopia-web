@@ -96,7 +96,7 @@ export interface ApiError {
   status: number;
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 // Request types for API calls

@@ -2,9 +2,9 @@
 export class EstopiaError extends Error {
   status: number;
   code: string;
-  details?: any;
+  details?: unknown;
 
-  constructor(message: string, status: number = 500, code: string = 'UNKNOWN_ERROR', details?: any) {
+  constructor(message: string, status: number = 500, code: string = 'UNKNOWN_ERROR', details?: unknown) {
     super(message);
     this.name = 'EstopiaError';
     this.status = status;
@@ -14,11 +14,11 @@ export class EstopiaError extends Error {
 }
 
 // Error handler function with proper types
-export const handleApiError = (error: any): EstopiaError => {
+export const handleApiError = (error: unknown): EstopiaError => {
   console.error('API Error:', error);
 
   // Network errors
-  if (!error.response) {
+  if (!error || typeof error !== 'object' || !('response' in error)) {
     return new EstopiaError(
       'Network error. Please check your connection.',
       0,
@@ -26,13 +26,14 @@ export const handleApiError = (error: any): EstopiaError => {
     );
   }
 
-  const status = error.response.status;
-  const data = error.response.data;
+  const response = (error as { response: { status: number; data: unknown } }).response;
+  const status = response.status;
+  const data = response.data;
 
   switch (status) {
     case 400:
       return new EstopiaError(
-        data?.message || 'Invalid request data',
+        data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : 'Invalid request data',
         400,
         'BAD_REQUEST',
         data
@@ -54,14 +55,14 @@ export const handleApiError = (error: any): EstopiaError => {
 
     case 404:
       return new EstopiaError(
-        data?.message || 'Resource not found',
+        data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : 'Resource not found',
         404,
         'NOT_FOUND'
       );
 
     case 409:
       return new EstopiaError(
-        data?.message || 'Resource already exists',
+        data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : 'Resource already exists',
         409,
         'CONFLICT'
       );
@@ -71,7 +72,7 @@ export const handleApiError = (error: any): EstopiaError => {
         'Validation failed',
         422,
         'VALIDATION_ERROR',
-        data?.errors || data
+        data && typeof data === 'object' && 'errors' in data ? (data as { errors: unknown }).errors : data
       );
 
     case 500:
@@ -90,7 +91,7 @@ export const handleApiError = (error: any): EstopiaError => {
 
     default:
       return new EstopiaError(
-        data?.message || 'An unexpected error occurred',
+        data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : 'An unexpected error occurred',
         status,
         'UNKNOWN_ERROR',
         data
@@ -131,7 +132,7 @@ export const apiCall = async <T>(apiFunction: () => Promise<Response>): Promise<
     if (contentType && contentType.includes('application/json')) {
       try {
         return await response.json();
-      } catch (jsonError) {
+      } catch {
         console.warn('Failed to parse JSON response, returning null');
         return null as T;
       }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useError } from '../context/useError';
 import { clientService } from '../services/api';
-import { useError } from '../context/ErrorContext';
 import type { Client, CreateClientRequest, UpdateClientRequest } from '../types/models';
 
 function ClientList() {
@@ -17,16 +17,17 @@ function ClientList() {
   });
   const [editData, setEditData] = useState<Partial<Client>>({});
 
-  useEffect(() => {
-    loadClients();
-  }, []);
-
-  const loadClients = async () => {
+  const loadClients = useCallback(async () => {
     await withErrorHandling(async () => {
       const data = await clientService.getAllClients();
       setClients(data);
     });
-  };
+  }, [withErrorHandling]);
+
+  useEffect(() => {
+    loadClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddClient = () => {
     setIsAdding(true);
@@ -82,13 +83,17 @@ function ClientList() {
 
   const handleEdit = (client: Client) => {
     setEditingId(client.id!);
-    setEditData({...client});
+    setEditData({ ...client });
   };
 
   const handleSaveEdit = async () => {
     if (editingId && editData.id) {
       await withErrorHandling(async () => {
-        const { id, createdAt, updatedAt, ...updateData } = editData;
+        // Only use the fields needed for update
+        const updateData = { ...editData };
+        delete updateData.id;
+        delete updateData.createdAt;
+        delete updateData.updatedAt;
 
         // Clean up the data similar to create
         const cleanUpdateData: UpdateClientRequest = {
@@ -156,7 +161,7 @@ function ClientList() {
                   <input
                     type="text"
                     value={newClient.firstName}
-                    onChange={(e) => setNewClient({...newClient, firstName: e.target.value})}
+                    onChange={(e) => setNewClient({ ...newClient, firstName: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="First name *"
                     disabled={loading}
@@ -167,7 +172,7 @@ function ClientList() {
                   <input
                     type="text"
                     value={newClient.lastName}
-                    onChange={(e) => setNewClient({...newClient, lastName: e.target.value})}
+                    onChange={(e) => setNewClient({ ...newClient, lastName: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Last name *"
                     disabled={loading}
@@ -178,7 +183,7 @@ function ClientList() {
                   <input
                     type="email"
                     value={newClient.email || ''}
-                    onChange={(e) => setNewClient({...newClient, email: e.target.value})}
+                    onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Email (optional)"
                     disabled={loading}
@@ -188,7 +193,7 @@ function ClientList() {
                   <input
                     type="tel"
                     value={newClient.phoneNumber || ''}
-                    onChange={(e) => setNewClient({...newClient, phoneNumber: e.target.value})}
+                    onChange={(e) => setNewClient({ ...newClient, phoneNumber: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Phone (optional)"
                     disabled={loading}
@@ -198,7 +203,7 @@ function ClientList() {
                   <input
                     type="text"
                     value={newClient.address || ''}
-                    onChange={(e) => setNewClient({...newClient, address: e.target.value})}
+                    onChange={(e) => setNewClient({ ...newClient, address: e.target.value })}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Address (optional)"
                     disabled={loading}
@@ -231,7 +236,7 @@ function ClientList() {
                     <input
                       type="text"
                       value={editData.firstName || ''}
-                      onChange={(e) => setEditData({...editData, firstName: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, firstName: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
@@ -244,7 +249,7 @@ function ClientList() {
                     <input
                       type="text"
                       value={editData.lastName || ''}
-                      onChange={(e) => setEditData({...editData, lastName: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, lastName: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
@@ -257,7 +262,7 @@ function ClientList() {
                     <input
                       type="email"
                       value={editData.email || ''}
-                      onChange={(e) => setEditData({...editData, email: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, email: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
@@ -270,7 +275,7 @@ function ClientList() {
                     <input
                       type="tel"
                       value={editData.phoneNumber || ''}
-                      onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, phoneNumber: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
@@ -283,7 +288,7 @@ function ClientList() {
                     <input
                       type="text"
                       value={editData.address || ''}
-                      onChange={(e) => setEditData({...editData, address: e.target.value})}
+                      onChange={(e) => setEditData({ ...editData, address: e.target.value })}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
