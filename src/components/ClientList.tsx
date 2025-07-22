@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { clientService } from '../services/api.js';
-import { useError } from '../context/ErrorContext.jsx';
+import { clientService, type Client } from '../services/api';
+import { useError } from '../context/ErrorContext';
 
 function ClientList() {
   const { withErrorHandling, loading } = useError();
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [newClient, setNewClient] = useState({
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [newClient, setNewClient] = useState<Omit<Client, 'id'>>({
     firstName: '',
     lastName: '',
     email: '',
-    phoneNumber: '',
+    phone: '',
     address: ''
   });
-  const [editData, setEditData] = useState({});
+  const [editData, setEditData] = useState<Partial<Client>>({});
 
   useEffect(() => {
     loadClients();
@@ -35,28 +35,30 @@ function ClientList() {
     await withErrorHandling(async () => {
       const savedClient = await clientService.createClient(newClient);
       setClients([...clients, savedClient]);
-      setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
+      setNewClient({ firstName: '', lastName: '', email: '', phone: '', address: '' });
       setIsAdding(false);
     }, 'Client created successfully!');
   };
 
   const handleCancelAdd = () => {
     setIsAdding(false);
-    setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
+    setNewClient({ firstName: '', lastName: '', email: '', phone: '', address: '' });
   };
 
-  const handleEdit = (client) => {
-    setEditingId(client.id);
+  const handleEdit = (client: Client) => {
+    setEditingId(client.id!);
     setEditData({...client});
   };
 
   const handleSaveEdit = async () => {
-    await withErrorHandling(async () => {
-      const updatedClient = await clientService.updateClient(editingId, editData);
-      setClients(clients.map(c => c.id === editingId ? updatedClient : c));
-      setEditingId(null);
-      setEditData({});
-    }, 'Client updated successfully!');
+    if (editingId && editData.id) {
+      await withErrorHandling(async () => {
+        const updatedClient = await clientService.updateClient(editingId, editData as Omit<Client, 'id'>);
+        setClients(clients.map(c => c.id === editingId ? updatedClient : c));
+        setEditingId(null);
+        setEditData({});
+      }, 'Client updated successfully!');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -64,7 +66,7 @@ function ClientList() {
     setEditData({});
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       await withErrorHandling(async () => {
         await clientService.deleteClient(id);
@@ -75,10 +77,10 @@ function ClientList() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-start items-center mb-6">
-        <button 
+      <div className="mb-4">
+        <button
           onClick={handleAddClient}
-          disabled={loading}
+          disabled={loading || isAdding}
           className="text-blue-600 hover:text-blue-900 text-sm font-medium disabled:opacity-50"
         >
           + Add Client
@@ -135,8 +137,8 @@ function ClientList() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="text"
-                    value={newClient.phoneNumber}
-                    onChange={(e) => setNewClient({...newClient, phoneNumber: e.target.value})}
+                    value={newClient.phone}
+                    onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Phone"
                     disabled={loading}
@@ -152,123 +154,122 @@ function ClientList() {
                     disabled={loading}
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button 
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button
                     onClick={handleSaveClient}
                     disabled={loading}
-                    className="text-green-600 hover:text-green-900 mr-3 font-medium disabled:opacity-50"
+                    className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
                   >
-                    {loading ? 'Saving...' : 'Save'}
+                    Save
                   </button>
-                  <button 
+                  <button
                     onClick={handleCancelAdd}
                     disabled={loading}
-                    className="text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
+                    className="text-gray-600 hover:text-gray-900 disabled:opacity-50"
                   >
                     Cancel
                   </button>
                 </td>
               </tr>
             )}
+
             {clients.map((client) => (
-              <tr key={client.id} className="hover:bg-gray-50">
+              <tr key={client.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{client.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {editingId === client.id ? (
                     <input
                       type="text"
-                      value={editData.firstName}
+                      value={editData.firstName || ''}
                       onChange={(e) => setEditData({...editData, firstName: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{client.firstName}</span>
+                    client.firstName
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {editingId === client.id ? (
                     <input
                       type="text"
-                      value={editData.lastName}
+                      value={editData.lastName || ''}
                       onChange={(e) => setEditData({...editData, lastName: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{client.lastName}</span>
+                    client.lastName
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {editingId === client.id ? (
                     <input
                       type="email"
-                      value={editData.email}
+                      value={editData.email || ''}
                       onChange={(e) => setEditData({...editData, email: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    <span className="text-sm text-gray-500">{client.email}</span>
+                    client.email
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {editingId === client.id ? (
                     <input
                       type="text"
-                      value={editData.phoneNumber}
-                      onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
+                      value={editData.phone || ''}
+                      onChange={(e) => setEditData({...editData, phone: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    <span className="text-sm text-gray-500">{client.phoneNumber}</span>
+                    client.phone
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {editingId === client.id ? (
                     <input
                       type="text"
-                      value={editData.address}
+                      value={editData.address || ''}
                       onChange={(e) => setEditData({...editData, address: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    <span className="text-sm text-gray-500">{client.address || '-'}</span>
+                    client.address
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {editingId === client.id ? (
                     <>
-                      <button 
+                      <button
                         onClick={handleSaveEdit}
                         disabled={loading}
-                        className="text-green-600 hover:text-green-900 mr-3 font-medium disabled:opacity-50"
+                        className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
                       >
-                        {loading ? 'Saving...' : 'Save'}
+                        Save
                       </button>
-                      <button 
+                      <button
                         onClick={handleCancelEdit}
                         disabled={loading}
-                        className="text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
+                        className="text-gray-600 hover:text-gray-900 disabled:opacity-50"
                       >
                         Cancel
                       </button>
                     </>
                   ) : (
                     <>
-                      <button 
+                      <button
                         onClick={() => handleEdit(client)}
-                        disabled={loading}
-                        className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
+                        className="text-blue-600 hover:text-blue-900 mr-3"
                       >
                         Edit
                       </button>
-                      <button 
-                        onClick={() => handleDelete(client.id)}
-                        disabled={loading}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                      <button
+                        onClick={() => handleDelete(client.id!)}
+                        className="text-red-600 hover:text-red-900"
                       >
                         Delete
                       </button>
@@ -280,6 +281,18 @@ function ClientList() {
           </tbody>
         </table>
       </div>
+
+      {clients.length === 0 && !loading && (
+        <div className="text-center py-8 text-gray-500">
+          No clients found. Click "Add Client" to create one.
+        </div>
+      )}
+
+      {loading && (
+        <div className="text-center py-8 text-gray-500">
+          Loading clients...
+        </div>
+      )}
     </div>
   );
 }

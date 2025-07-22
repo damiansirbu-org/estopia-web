@@ -1,0 +1,285 @@
+import { apiCall } from '../utils/ErrorHandler';
+
+// API Base URL
+const API_BASE_URL = 'http://localhost:8080/api';
+
+// Type definitions based on the backend DTOs
+export interface Client {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+}
+
+export interface Asset {
+  id?: number;
+  name: string;
+  address: string;
+  type: string;
+  rooms: number;
+  status: 'Available' | 'Occupied' | 'Maintenance';
+}
+
+export interface Contract {
+  id?: number;
+  clientId: number;
+  assetId: number;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  status: 'Active' | 'Inactive' | 'Terminated';
+}
+
+export interface Payment {
+  id?: number;
+  contractId: number;
+  dueDate: string;
+  amount: number;
+  status: 'Paid' | 'Pending' | 'Overdue';
+  paymentDate?: string;
+}
+
+// Client API Service
+export const clientService = {
+  async getAllClients(): Promise<Client[]> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/clients`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async createClient(client: Omit<Client, 'id'>): Promise<Client> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/clients`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(client),
+      })
+    );
+  },
+
+  async updateClient(id: number, client: Omit<Client, 'id'>): Promise<Client> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/clients/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(client),
+      })
+    );
+  },
+
+  async deleteClient(id: number): Promise<void> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/clients/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async getClientById(id: number): Promise<Client> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/clients/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  }
+};
+
+// Asset API Service
+export const assetService = {
+  async getAllAssets(): Promise<Asset[]> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/assets`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async createAsset(asset: Omit<Asset, 'id'>): Promise<Asset> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/assets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(asset),
+      })
+    );
+  },
+
+  async updateAsset(id: number, asset: Omit<Asset, 'id'>): Promise<Asset> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/assets/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(asset),
+      })
+    );
+  },
+
+  async deleteAsset(id: number): Promise<void> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/assets/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async getAssetById(id: number): Promise<Asset> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/assets/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  }
+};
+
+// Contract API Service
+export const contractService = {
+  async getAllContracts(): Promise<Contract[]> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/contracts`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async createContract(contract: Omit<Contract, 'id'>): Promise<Contract> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/contracts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contract),
+      })
+    );
+  },
+
+  async updateContract(id: number, contract: Omit<Contract, 'id'>): Promise<Contract> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/contracts/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contract),
+      })
+    );
+  },
+
+  async deleteContract(id: number): Promise<void> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/contracts/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async getContractById(id: number): Promise<Contract> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/contracts/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  }
+};
+
+// Payment API Service
+export const paymentService = {
+  async getAllPayments(): Promise<Payment[]> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/payments`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async createPayment(payment: Omit<Payment, 'id'>): Promise<Payment> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/payments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payment),
+      })
+    );
+  },
+
+  async updatePayment(id: number, payment: Omit<Payment, 'id'>): Promise<Payment> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/payments/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payment),
+      })
+    );
+  },
+
+  async deletePayment(id: number): Promise<void> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/payments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  },
+
+  async getPaymentById(id: number): Promise<Payment> {
+    return apiCall(() =>
+      fetch(`${API_BASE_URL}/payments/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    );
+  }
+};
+
+// Backward compatibility - keeping the old clientService export
+export default clientService;

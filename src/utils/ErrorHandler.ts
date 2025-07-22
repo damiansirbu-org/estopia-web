@@ -105,20 +105,43 @@ export const apiCall = async <T>(apiFunction: () => Promise<Response>): Promise<
 
     if (!response.ok) {
       // Create a mock error object similar to what axios would create
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: response.statusText };
+      }
+
       const mockError = {
         response: {
           status: response.status,
-          data: await response.json().catch(() => ({ message: response.statusText }))
+          data: errorData
         }
       };
       throw handleApiError(mockError);
     }
 
-    return await response.json();
+    // Handle empty responses (like DELETE operations returning 204)
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null as T;
+    }
+
+    // Check if response has content
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        return await response.json();
+      } catch (jsonError) {
+        console.warn('Failed to parse JSON response, returning null');
+        return null as T;
+      }
+    }
+
+    return null as T;
   } catch (error) {
     if (error instanceof EstopiaError) {
       throw error;
     }
-    throw handleApiError(error);
+    throw handleApiError({ response: null });
   }
 };
