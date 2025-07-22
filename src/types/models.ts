@@ -34,8 +34,8 @@ export interface Contract {
   id?: number;
   clientId: number;
   assetId: number;
-  startDate: string;
-  endDate: string;
+  startDate: string; // LocalDate in backend
+  endDate: string;   // LocalDate in backend
   rentAmount: number;
   amountMaintenance?: number;
   amountDeposit: number;
@@ -48,7 +48,7 @@ export interface Contract {
 export interface Payment {
   id?: number;
   contractId: number;
-  dueDate: string;
+  dueDate: string; // LocalDate in backend
   rentAmount: number;
   amountMaintenance?: number;
   amountNaturalGas?: number;
@@ -57,10 +57,46 @@ export interface Payment {
   amountOther?: number;
   amountPaid?: number;
   isPaid?: boolean;
-  paymentDate?: string;
+  paymentDate?: string; // LocalDate in backend
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// Filter DTOs for advanced filtering (matching backend)
+export interface ClientFilterDTO {
+  include?: Partial<Client>;
+  exclude?: Partial<Client>;
+}
+
+export interface AssetFilterDTO {
+  include?: Partial<Asset>;
+  exclude?: Partial<Asset>;
+}
+
+export interface ContractFilterDTO {
+  include?: Partial<Contract>;
+  exclude?: Partial<Contract>;
+}
+
+export interface PaymentFilterDTO {
+  include?: Partial<Payment>;
+  exclude?: Partial<Payment>;
+}
+
+// API Response types
+export interface ApiResponse<T> {
+  data?: T;
+  message?: string;
+  error?: string;
+}
+
+// Error types
+export interface ApiError {
+  status: number;
+  code: string;
+  message: string;
+  details?: any;
 }
 
 // Request types for API calls
@@ -75,3 +111,11 @@ export type UpdateContractRequest = Omit<Contract, 'id' | 'createdAt' | 'updated
 
 export type CreatePaymentRequest = Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdatePaymentRequest = Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>;
+
+// Notification types
+export type NotificationType = 'error' | 'success' | 'info';
+
+export interface Notification {
+  type: NotificationType;
+  message: string;
+}

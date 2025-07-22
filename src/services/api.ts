@@ -24,6 +24,9 @@ export const clientService = {
   },
 
   async createClient(client: CreateClientRequest): Promise<Client> {
+    // Debug: log what we're sending
+    console.log('🔍 Sending client data to backend:', client);
+
     return apiCall(() =>
       fetch(`${API_BASE_URL}/clients`, {
         method: 'POST',
@@ -36,6 +39,9 @@ export const clientService = {
   },
 
   async updateClient(id: number, client: UpdateClientRequest): Promise<Client> {
+    // Debug: log what we're updating
+    console.log('🔍 Updating client data:', { id, client });
+
     return apiCall(() =>
       fetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'PUT',

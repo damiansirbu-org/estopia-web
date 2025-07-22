@@ -33,17 +33,51 @@ function ClientList() {
   };
 
   const handleSaveClient = async () => {
+    // Debug: log ce trimitem
+    console.log('🔍 Creating client with data:', newClient);
+
+    // Validare minim first/last name
+    if (!newClient.firstName.trim() || !newClient.lastName.trim()) {
+      alert('First name and last name are required!');
+      return;
+    }
+
     await withErrorHandling(async () => {
-      const savedClient = await clientService.createClient(newClient);
+      // Trimite doar câmpurile non-empty pentru email și phone
+      const clientData: CreateClientRequest = {
+        firstName: newClient.firstName.trim(),
+        lastName: newClient.lastName.trim(),
+        address: newClient.address?.trim() || undefined,
+        email: newClient.email?.trim() || undefined,
+        phoneNumber: newClient.phoneNumber?.trim() || undefined
+      };
+
+      console.log('🔍 Cleaned client data being sent:', clientData);
+
+      const savedClient = await clientService.createClient(clientData);
+      console.log('🔍 Received from backend:', savedClient);
+
       setClients([...clients, savedClient]);
-      setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
+      setNewClient({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        address: ''
+      });
       setIsAdding(false);
     }, 'Client created successfully!');
   };
 
   const handleCancelAdd = () => {
     setIsAdding(false);
-    setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
+    setNewClient({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      address: ''
+    });
   };
 
   const handleEdit = (client: Client) => {
@@ -55,7 +89,19 @@ function ClientList() {
     if (editingId && editData.id) {
       await withErrorHandling(async () => {
         const { id, createdAt, updatedAt, ...updateData } = editData;
-        const updatedClient = await clientService.updateClient(editingId, updateData as UpdateClientRequest);
+
+        // Clean up the data similar to create
+        const cleanUpdateData: UpdateClientRequest = {
+          firstName: updateData.firstName?.trim() || '',
+          lastName: updateData.lastName?.trim() || '',
+          address: updateData.address?.trim() || undefined,
+          email: updateData.email?.trim() || undefined,
+          phoneNumber: updateData.phoneNumber?.trim() || undefined
+        };
+
+        console.log('🔍 Updating client with data:', cleanUpdateData);
+
+        const updatedClient = await clientService.updateClient(editingId, cleanUpdateData);
         setClients(clients.map(c => c.id === editingId ? updatedClient : c));
         setEditingId(null);
         setEditData({});
@@ -112,8 +158,9 @@ function ClientList() {
                     value={newClient.firstName}
                     onChange={(e) => setNewClient({...newClient, firstName: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="First name"
+                    placeholder="First name *"
                     disabled={loading}
+                    required
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -122,8 +169,9 @@ function ClientList() {
                     value={newClient.lastName}
                     onChange={(e) => setNewClient({...newClient, lastName: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Last name"
+                    placeholder="Last name *"
                     disabled={loading}
+                    required
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -132,17 +180,17 @@ function ClientList() {
                     value={newClient.email || ''}
                     onChange={(e) => setNewClient({...newClient, email: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Email"
+                    placeholder="Email (optional)"
                     disabled={loading}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
-                    type="text"
+                    type="tel"
                     value={newClient.phoneNumber || ''}
                     onChange={(e) => setNewClient({...newClient, phoneNumber: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Phone"
+                    placeholder="Phone (optional)"
                     disabled={loading}
                   />
                 </td>
@@ -152,7 +200,7 @@ function ClientList() {
                     value={newClient.address || ''}
                     onChange={(e) => setNewClient({...newClient, address: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Address"
+                    placeholder="Address (optional)"
                     disabled={loading}
                   />
                 </td>
@@ -214,20 +262,20 @@ function ClientList() {
                       disabled={loading}
                     />
                   ) : (
-                    client.email
+                    client.email || '-'
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {editingId === client.id ? (
                     <input
-                      type="text"
+                      type="tel"
                       value={editData.phoneNumber || ''}
                       onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    client.phoneNumber
+                    client.phoneNumber || '-'
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -240,7 +288,7 @@ function ClientList() {
                       disabled={loading}
                     />
                   ) : (
-                    client.address
+                    client.address || '-'
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

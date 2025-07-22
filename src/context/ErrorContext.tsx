@@ -1,9 +1,20 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { AlertCircle, CheckCircle, Info, X } from 'lucide-react';
+import type { NotificationType, Notification } from '../types/models';
 
-const ErrorContext = createContext();
+interface ErrorContextType {
+  notification: Notification | null;
+  loading: boolean;
+  showError: (message: string) => void;
+  showSuccess: (message: string) => void;
+  showInfo: (message: string) => void;
+  clearNotification: () => void;
+  withErrorHandling: <T>(asyncFunction: () => Promise<T>, successMessage?: string | null) => Promise<T>;
+}
 
-export const useError = () => {
+const ErrorContext = createContext<ErrorContextType | undefined>(undefined);
+
+export const useError = (): ErrorContextType => {
   const context = useContext(ErrorContext);
   if (!context) {
     throw new Error('useError must be used within an ErrorProvider');
@@ -11,7 +22,12 @@ export const useError = () => {
   return context;
 };
 
-function NotificationBanner({ notification, onClose }) {
+interface NotificationBannerProps {
+  notification: Notification;
+  onClose: () => void;
+}
+
+function NotificationBanner({ notification, onClose }: NotificationBannerProps) {
   if (!notification) return null;
 
   const getStyles = () => {
@@ -51,7 +67,7 @@ function NotificationBanner({ notification, onClose }) {
     }
   };
 
-  const getIcon = () => {
+  const getIcon = (): React.ReactNode => {
     const styles = getStyles();
     switch (notification.type) {
       case 'error':
@@ -75,7 +91,7 @@ function NotificationBanner({ notification, onClose }) {
         </div>
         <div className="ml-3">
           <h3 className={`text-sm font-medium ${styles.title}`}>
-            {notification.type === 'error' ? 'Error' : 
+            {notification.type === 'error' ? 'Error' :
              notification.type === 'success' ? 'Success' : 'Information'}
           </h3>
           <div className={`mt-2 text-sm ${styles.message}`}>
@@ -97,27 +113,34 @@ function NotificationBanner({ notification, onClose }) {
   );
 }
 
-export function ErrorProvider({ children }) {
-  const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState(false);
+interface ErrorProviderProps {
+  children: ReactNode;
+}
 
-  const showError = (message) => {
+export default function ErrorProvider({ children }: ErrorProviderProps) {
+  const [notification, setNotification] = useState<Notification | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const showError = (message: string): void => {
     setNotification({ type: 'error', message });
   };
 
-  const showSuccess = (message) => {
+  const showSuccess = (message: string): void => {
     setNotification({ type: 'success', message });
   };
 
-  const showInfo = (message) => {
+  const showInfo = (message: string): void => {
     setNotification({ type: 'info', message });
   };
 
-  const clearNotification = () => {
+  const clearNotification = (): void => {
     setNotification(null);
   };
 
-  const withErrorHandling = async (asyncFunction, successMessage = null) => {
+  const withErrorHandling = async <T,>(
+    asyncFunction: () => Promise<T>,
+    successMessage: string | null = null
+  ): Promise<T> => {
     try {
       setLoading(true);
       clearNotification();
@@ -126,7 +149,7 @@ export function ErrorProvider({ children }) {
         showSuccess(successMessage);
       }
       return result;
-    } catch (error) {
+    } catch (error: any) {
       showError(error.message || 'An unexpected error occurred');
       throw error;
     } finally {
@@ -134,7 +157,7 @@ export function ErrorProvider({ children }) {
     }
   };
 
-  const value = {
+  const value: ErrorContextType = {
     notification,
     loading,
     showError,
@@ -150,9 +173,9 @@ export function ErrorProvider({ children }) {
         {children}
         {notification && (
           <div className="fixed top-4 right-4 max-w-md z-50">
-            <NotificationBanner 
-              notification={notification} 
-              onClose={clearNotification} 
+            <NotificationBanner
+              notification={notification}
+              onClose={clearNotification}
             />
           </div>
         )}

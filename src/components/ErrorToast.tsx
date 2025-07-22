@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, Info } from 'lucide-react';
-import type { NotificationType } from '../types/models';
+
+export type NotificationType = 'error' | 'success' | 'info';
 
 export interface ErrorToastProps {
   message: string;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ErrorProvider } from './context/ErrorContext';
+import ErrorProvider from './context/ErrorContext';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import ClientList from './components/ClientList';
