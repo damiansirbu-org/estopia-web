@@ -1,7 +1,16 @@
 import React, { useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, Info } from 'lucide-react';
 
-function ErrorToast({ message, type, onClose, duration = 5000 }) {
+export type NotificationType = 'error' | 'success' | 'info';
+
+export interface ErrorToastProps {
+  message: string;
+  type: NotificationType;
+  onClose: () => void;
+  duration?: number;
+}
+
+function ErrorToast({ message, type, onClose, duration = 5000 }: ErrorToastProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -10,7 +19,7 @@ function ErrorToast({ message, type, onClose, duration = 5000 }) {
     return () => clearTimeout(timer);
   }, [onClose, duration]);
 
-  const getToastStyle = () => {
+  const getToastStyle = (): string => {
     switch (type) {
       case 'error':
         return 'bg-red-50 border-red-200 text-red-800';
@@ -23,7 +32,7 @@ function ErrorToast({ message, type, onClose, duration = 5000 }) {
     }
   };
 
-  const getIcon = () => {
+  const getIcon = (): React.ReactNode => {
     switch (type) {
       case 'error':
         return <AlertCircle className="h-5 w-5 text-red-500" />;

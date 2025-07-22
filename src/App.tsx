@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { ErrorProvider } from './context/ErrorContext';
-import Header from './components/Header';
-import Dashboard from './pages/Dashboard';
-import ClientList from './components/ClientList';
+import { useState } from 'react';
 import AssetList from './components/AssetList';
+import ClientList from './components/ClientList';
 import ContractList from './components/ContractList';
+import Header from './components/Header';
 import PaymentList from './components/PaymentList';
+import ErrorProvider from './context/ErrorProvider';
+import Dashboard from './pages/Dashboard';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
