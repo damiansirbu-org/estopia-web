@@ -1,6 +1,10 @@
-// Custom error class
+// Custom error class with proper TypeScript types
 export class EstopiaError extends Error {
-  constructor(message, status = 500, code = 'UNKNOWN_ERROR', details = null) {
+  status: number;
+  code: string;
+  details?: any;
+
+  constructor(message: string, status: number = 500, code: string = 'UNKNOWN_ERROR', details?: any) {
     super(message);
     this.name = 'EstopiaError';
     this.status = status;
@@ -9,8 +13,8 @@ export class EstopiaError extends Error {
   }
 }
 
-// Error handler function - DEFINED FIRST
-export const handleApiError = (error) => {
+// Error handler function with proper types
+export const handleApiError = (error: any): EstopiaError => {
   console.error('API Error:', error);
 
   // Network errors
@@ -77,9 +81,16 @@ export const handleApiError = (error) => {
         'SERVER_ERROR'
       );
 
+    case 503:
+      return new EstopiaError(
+        'Service temporarily unavailable',
+        503,
+        'SERVICE_UNAVAILABLE'
+      );
+
     default:
       return new EstopiaError(
-        data?.message || 'Something went wrong',
+        data?.message || 'An unexpected error occurred',
         status,
         'UNKNOWN_ERROR',
         data
@@ -87,34 +98,27 @@ export const handleApiError = (error) => {
   }
 };
 
-// Async wrapper for API calls - DEFINED AFTER handleApiError
-export const apiCall = async (apiFunction) => {
+// Helper function for API calls with error handling
+export const apiCall = async <T>(apiFunction: () => Promise<Response>): Promise<T> => {
   try {
     const response = await apiFunction();
 
     if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = { message: response.statusText };
-      }
-
-      throw {
+      // Create a mock error object similar to what axios would create
+      const mockError = {
         response: {
           status: response.status,
-          data: errorData
+          data: await response.json().catch(() => ({ message: response.statusText }))
         }
       };
-    }
-
-    // Handle empty responses (like DELETE operations returning 204)
-    if (response.status === 204) {
-      return null;
+      throw handleApiError(mockError);
     }
 
     return await response.json();
   } catch (error) {
+    if (error instanceof EstopiaError) {
+      throw error;
+    }
     throw handleApiError(error);
   }
 };
