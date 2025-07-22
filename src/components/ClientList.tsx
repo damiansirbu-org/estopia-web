@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { clientService, type Client } from '../services/api';
+import { clientService } from '../services/api';
 import { useError } from '../context/ErrorContext';
+import type { Client, CreateClientRequest, UpdateClientRequest } from '../types/models';
 
 function ClientList() {
   const { withErrorHandling, loading } = useError();
   const [clients, setClients] = useState<Client[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [newClient, setNewClient] = useState<Omit<Client, 'id'>>({
+  const [newClient, setNewClient] = useState<CreateClientRequest>({
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     address: ''
   });
   const [editData, setEditData] = useState<Partial<Client>>({});
@@ -35,14 +36,14 @@ function ClientList() {
     await withErrorHandling(async () => {
       const savedClient = await clientService.createClient(newClient);
       setClients([...clients, savedClient]);
-      setNewClient({ firstName: '', lastName: '', email: '', phone: '', address: '' });
+      setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
       setIsAdding(false);
     }, 'Client created successfully!');
   };
 
   const handleCancelAdd = () => {
     setIsAdding(false);
-    setNewClient({ firstName: '', lastName: '', email: '', phone: '', address: '' });
+    setNewClient({ firstName: '', lastName: '', email: '', phoneNumber: '', address: '' });
   };
 
   const handleEdit = (client: Client) => {
@@ -53,7 +54,8 @@ function ClientList() {
   const handleSaveEdit = async () => {
     if (editingId && editData.id) {
       await withErrorHandling(async () => {
-        const updatedClient = await clientService.updateClient(editingId, editData as Omit<Client, 'id'>);
+        const { id, createdAt, updatedAt, ...updateData } = editData;
+        const updatedClient = await clientService.updateClient(editingId, updateData as UpdateClientRequest);
         setClients(clients.map(c => c.id === editingId ? updatedClient : c));
         setEditingId(null);
         setEditData({});
@@ -127,7 +129,7 @@ function ClientList() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="email"
-                    value={newClient.email}
+                    value={newClient.email || ''}
                     onChange={(e) => setNewClient({...newClient, email: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Email"
@@ -137,8 +139,8 @@ function ClientList() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="text"
-                    value={newClient.phone}
-                    onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
+                    value={newClient.phoneNumber || ''}
+                    onChange={(e) => setNewClient({...newClient, phoneNumber: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Phone"
                     disabled={loading}
@@ -147,7 +149,7 @@ function ClientList() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
                     type="text"
-                    value={newClient.address}
+                    value={newClient.address || ''}
                     onChange={(e) => setNewClient({...newClient, address: e.target.value})}
                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     placeholder="Address"
@@ -219,13 +221,13 @@ function ClientList() {
                   {editingId === client.id ? (
                     <input
                       type="text"
-                      value={editData.phone || ''}
-                      onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                      value={editData.phoneNumber || ''}
+                      onChange={(e) => setEditData({...editData, phoneNumber: e.target.value})}
                       className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       disabled={loading}
                     />
                   ) : (
-                    client.phone
+                    client.phoneNumber
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

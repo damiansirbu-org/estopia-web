@@ -1,45 +1,14 @@
 import { apiCall } from '../utils/ErrorHandler';
+import type {
+  Client, Asset, Contract, Payment,
+  CreateClientRequest, UpdateClientRequest,
+  CreateAssetRequest, UpdateAssetRequest,
+  CreateContractRequest, UpdateContractRequest,
+  CreatePaymentRequest, UpdatePaymentRequest
+} from '../types/models';
 
 // API Base URL
 const API_BASE_URL = 'http://localhost:8080/api';
-
-// Type definitions based on the backend DTOs
-export interface Client {
-  id?: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-}
-
-export interface Asset {
-  id?: number;
-  name: string;
-  address: string;
-  type: string;
-  rooms: number;
-  status: 'Available' | 'Occupied' | 'Maintenance';
-}
-
-export interface Contract {
-  id?: number;
-  clientId: number;
-  assetId: number;
-  startDate: string;
-  endDate: string;
-  rentAmount: number;
-  status: 'Active' | 'Inactive' | 'Terminated';
-}
-
-export interface Payment {
-  id?: number;
-  contractId: number;
-  dueDate: string;
-  amount: number;
-  status: 'Paid' | 'Pending' | 'Overdue';
-  paymentDate?: string;
-}
 
 // Client API Service
 export const clientService = {
@@ -54,7 +23,7 @@ export const clientService = {
     );
   },
 
-  async createClient(client: Omit<Client, 'id'>): Promise<Client> {
+  async createClient(client: CreateClientRequest): Promise<Client> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/clients`, {
         method: 'POST',
@@ -66,7 +35,7 @@ export const clientService = {
     );
   },
 
-  async updateClient(id: number, client: Omit<Client, 'id'>): Promise<Client> {
+  async updateClient(id: number, client: UpdateClientRequest): Promise<Client> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'PUT',
@@ -114,7 +83,7 @@ export const assetService = {
     );
   },
 
-  async createAsset(asset: Omit<Asset, 'id'>): Promise<Asset> {
+  async createAsset(asset: CreateAssetRequest): Promise<Asset> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/assets`, {
         method: 'POST',
@@ -126,7 +95,7 @@ export const assetService = {
     );
   },
 
-  async updateAsset(id: number, asset: Omit<Asset, 'id'>): Promise<Asset> {
+  async updateAsset(id: number, asset: UpdateAssetRequest): Promise<Asset> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/assets/${id}`, {
         method: 'PUT',
@@ -142,17 +111,6 @@ export const assetService = {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/assets/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
-  },
-
-  async getAssetById(id: number): Promise<Asset> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/assets/${id}`, {
-        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -174,7 +132,7 @@ export const contractService = {
     );
   },
 
-  async createContract(contract: Omit<Contract, 'id'>): Promise<Contract> {
+  async createContract(contract: CreateContractRequest): Promise<Contract> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/contracts`, {
         method: 'POST',
@@ -186,7 +144,7 @@ export const contractService = {
     );
   },
 
-  async updateContract(id: number, contract: Omit<Contract, 'id'>): Promise<Contract> {
+  async updateContract(id: number, contract: UpdateContractRequest): Promise<Contract> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/contracts/${id}`, {
         method: 'PUT',
@@ -202,17 +160,6 @@ export const contractService = {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/contracts/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
-  },
-
-  async getContractById(id: number): Promise<Contract> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/contracts/${id}`, {
-        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -234,7 +181,7 @@ export const paymentService = {
     );
   },
 
-  async createPayment(payment: Omit<Payment, 'id'>): Promise<Payment> {
+  async createPayment(payment: CreatePaymentRequest): Promise<Payment> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/payments`, {
         method: 'POST',
@@ -246,7 +193,7 @@ export const paymentService = {
     );
   },
 
-  async updatePayment(id: number, payment: Omit<Payment, 'id'>): Promise<Payment> {
+  async updatePayment(id: number, payment: UpdatePaymentRequest): Promise<Payment> {
     return apiCall(() =>
       fetch(`${API_BASE_URL}/payments/${id}`, {
         method: 'PUT',
@@ -267,19 +214,8 @@ export const paymentService = {
         },
       })
     );
-  },
-
-  async getPaymentById(id: number): Promise<Payment> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/payments/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
   }
 };
 
-// Backward compatibility - keeping the old clientService export
+// Backward compatibility
 export default clientService;
