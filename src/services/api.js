@@ -1,4 +1,4 @@
-import { apiCall } from '../utils/errorHandler.js';
+import { apiCall } from '../utils/ErrorHandler.js';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
