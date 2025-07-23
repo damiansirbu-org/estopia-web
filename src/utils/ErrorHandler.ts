@@ -1,17 +1,41 @@
 // Custom error class with proper TypeScript types
+export interface ApiFieldError {
+  field: string;
+  code: string;
+  message: string;
+}
+
 export class EstopiaError extends Error {
   status: number;
   code: string;
   details?: unknown;
+  fieldErrors?: ApiFieldError[];
 
-  constructor(message: string, status: number = 500, code: string = 'UNKNOWN_ERROR', details?: unknown) {
+  constructor(message: string, status: number = 500, code: string = 'UNKNOWN_ERROR', details?: unknown, fieldErrors?: ApiFieldError[]) {
     super(message);
     this.name = 'EstopiaError';
     this.status = status;
     this.code = code;
     this.details = details;
+    this.fieldErrors = fieldErrors;
   }
 }
+
+function hasFieldErrors(data: unknown): data is { errors: ApiFieldError[] } {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'errors' in data &&
+    Array.isArray((data as { errors: unknown }).errors)
+  );
+}
+
+export const extractFieldErrors = (data: unknown): ApiFieldError[] | undefined => {
+  if (hasFieldErrors(data)) {
+    return data.errors.filter((e): e is ApiFieldError => !!e && typeof e.field === 'string');
+  }
+  return undefined;
+};
 
 // Error handler function with proper types
 export const handleApiError = (error: unknown): EstopiaError => {
@@ -29,6 +53,7 @@ export const handleApiError = (error: unknown): EstopiaError => {
   const response = (error as { response: { status: number; data: unknown } }).response;
   const status = response.status;
   const data = response.data;
+  const fieldErrors = extractFieldErrors(data);
 
   switch (status) {
     case 400:
@@ -36,7 +61,8 @@ export const handleApiError = (error: unknown): EstopiaError => {
         data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : 'Invalid request data',
         400,
         'BAD_REQUEST',
-        data
+        data,
+        fieldErrors
       );
 
     case 401:
@@ -72,7 +98,8 @@ export const handleApiError = (error: unknown): EstopiaError => {
         'Validation failed',
         422,
         'VALIDATION_ERROR',
-        data && typeof data === 'object' && 'errors' in data ? (data as { errors: unknown }).errors : data
+        data && typeof data === 'object' && 'errors' in data ? (data as { errors: unknown }).errors : data,
+        fieldErrors
       );
 
     case 500:
@@ -94,7 +121,8 @@ export const handleApiError = (error: unknown): EstopiaError => {
         data && typeof data === 'object' && 'message' in data ? (data as { message: string }).message : 'An unexpected error occurred',
         status,
         'UNKNOWN_ERROR',
-        data
+        data,
+        fieldErrors
       );
   }
 };
@@ -145,4 +173,11 @@ export const apiCall = async <T>(apiFunction: () => Promise<Response>): Promise<
     }
     throw handleApiError({ response: null });
   }
+};
+
+export type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  message?: string;
+  errors?: ApiFieldError[];
 };

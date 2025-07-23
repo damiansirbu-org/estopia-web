@@ -13,6 +13,7 @@ import type {
   UpdateContractRequest,
   UpdatePaymentRequest
 } from '../types/models';
+import type { ApiResponse } from '../utils/ErrorHandler';
 import { apiCall } from '../utils/ErrorHandler';
 
 // API Base URL
@@ -21,6 +22,7 @@ const API_BASE_URL = 'http://localhost:8080/api';
 // Client API Service
 export const clientService = {
   async getAllClients(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Client[]> {
+    let response: ApiResponse<Client[]>;
     if (params && params.filters && Object.keys(params.filters).length > 0) {
       // Use POST /api/clients/filter for filtering
       const filterDTO = { filters: params.filters };
@@ -29,7 +31,7 @@ export const clientService = {
       if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
       if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
       const queryString = query.length > 0 ? `?${query.join('&')}` : '';
-      return apiCall(() =>
+      response = await apiCall(() =>
         fetch(`${API_BASE_URL}/clients/filter${queryString}`, {
           method: 'POST',
           headers: {
@@ -48,7 +50,7 @@ export const clientService = {
         query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
       }
       const queryString = query.length > 0 ? `?${query.join('&')}` : '';
-      return apiCall(() =>
+      response = await apiCall(() =>
         fetch(`${API_BASE_URL}/clients${queryString}`, {
           method: 'GET',
           headers: {
@@ -57,13 +59,12 @@ export const clientService = {
         })
       );
     }
+    if (!response.success) throw new Error(response.message || 'API error');
+    return response.data || [];
   },
 
   async createClient(client: CreateClientRequest): Promise<Client> {
-    // Debug: log what we're sending
-    console.log('🔍 Sending client data to backend:', client);
-
-    return apiCall(() =>
+    const response: ApiResponse<Client> = await apiCall(() =>
       fetch(`${API_BASE_URL}/clients`, {
         method: 'POST',
         headers: {
@@ -72,13 +73,12 @@ export const clientService = {
         body: JSON.stringify(client),
       })
     );
+    if (!response.success) throw new Error(response.message || 'API error');
+    return response.data!;
   },
 
   async updateClient(id: number, client: UpdateClientRequest): Promise<Client> {
-    // Debug: log what we're updating
-    console.log('🔍 Updating client data:', { id, client });
-
-    return apiCall(() =>
+    const response: ApiResponse<Client> = await apiCall(() =>
       fetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'PUT',
         headers: {
@@ -87,10 +87,12 @@ export const clientService = {
         body: JSON.stringify(client),
       })
     );
+    if (!response.success) throw new Error(response.message || 'API error');
+    return response.data!;
   },
 
   async deleteClient(id: number): Promise<void> {
-    return apiCall(() =>
+    const response: ApiResponse<void> = await apiCall(() =>
       fetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'DELETE',
         headers: {
@@ -98,10 +100,11 @@ export const clientService = {
         },
       })
     );
+    if (!response.success) throw new Error(response.message || 'API error');
   },
 
   async getClientById(id: number): Promise<Client> {
-    return apiCall(() =>
+    const response: ApiResponse<Client> = await apiCall(() =>
       fetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'GET',
         headers: {
@@ -109,6 +112,8 @@ export const clientService = {
         },
       })
     );
+    if (!response.success) throw new Error(response.message || 'API error');
+    return response.data!;
   }
 };
 

@@ -351,11 +351,14 @@ execute_commands() {
 
 # Main script logic
 if [ $# -eq 0 ]; then
-    # No arguments - run normal dev server
-    run_normal
+    # No arguments - show help by default
+    show_help
 elif [ $# -eq 1 ]; then
     # Single argument - handle as before
     case "$1" in
+        "start-web")
+            run_normal
+            ;;
         "clean")
             run_clean
             ;;
