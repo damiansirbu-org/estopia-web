@@ -4,9 +4,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import type { SxProps } from '@mui/material';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
 import type { GridDensity, GridFilterModel, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import { DataGrid, GridRowEditStopReasons, GridRowModes, GridToolbarContainer, type GridCellParams, type GridColDef, type GridRowModesModel, type GridRowParams } from '@mui/x-data-grid';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useError } from '../context/useError';
 import { clientService } from '../services/api';
 import { DataGridStyleContext } from '../theme/DataGridStyleContext';
@@ -20,7 +21,8 @@ function ClientListMUI() {
     const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
     const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
     const [addRowId, setAddRowId] = useState<number | null>(null);
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    // Change fieldErrors to be per-row:
+    const [fieldErrors, setFieldErrors] = useState<Record<number, Record<string, string>>>({});
     const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'firstName', sort: 'asc' }]);
     const { styleKey } = useContext(DataGridStyleContext);
     const stylePresets: Record<string, { sx: SxProps; density: GridDensity }> = {
@@ -71,8 +73,32 @@ function ClientListMUI() {
             flex: 1,
             editable: true,
             minWidth: 120,
+            renderCell: (params: GridCellParams<Client>) => {
+                const error = fieldErrors[Number(params.id)]?.[params.field];
+                if (error) {
+                    return <span title={error} style={{ color: '#d32f2f' }}>{params.value as string}</span>;
+                }
+                return params.value as string;
+            },
+            renderEditCell: (params: GridCellParams<Client>) => {
+                const error = fieldErrors[Number(params.id)]?.[params.field];
+                return (
+                    <TextField
+                        value={params.value ?? ''}
+                        onChange={e => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value }, e)}
+                        error={!!error}
+                        helperText={error}
+                        size="small"
+                        variant="standard"
+                        fullWidth
+                        autoFocus={params.hasFocus}
+                    />
+                );
+            },
         })),
-    ], [filterFields]);
+    ], [filterFields, fieldErrors]);
+
+    const lastEditingRowId = useRef<number | null>(null);
 
     // Load clients
     const loadClients = useCallback(async (sort: GridSortModel = sortModel, filter: GridFilterModel = filterModel) => {
@@ -121,6 +147,7 @@ function ClientListMUI() {
 
     // Save new or edited row
     const processRowUpdate = async (newRow: Client): Promise<Client> => {
+        lastEditingRowId.current = newRow.id;
         setFieldErrors({});
         if (typeof newRow.id === 'number' && newRow.id < 0) {
             // Add
@@ -143,9 +170,9 @@ function ClientListMUI() {
                     for (const e of err.fieldErrors) {
                         fe[e.field] = e.message;
                     }
-                    setFieldErrors(fe);
+                    setFieldErrors({ [newRow.id]: fe });
                 }
-                throw err;
+                return Promise.reject(err);
             }
         } else {
             // Edit
@@ -167,9 +194,9 @@ function ClientListMUI() {
                     for (const e of err.fieldErrors) {
                         fe[e.field] = e.message;
                     }
-                    setFieldErrors(fe);
+                    setFieldErrors({ [newRow.id]: fe });
                 }
-                throw err;
+                return Promise.reject(err);
             }
         }
     };
@@ -238,7 +265,7 @@ function ClientListMUI() {
 
     // Add error display to editable cells
     const getCellClassName = (params: GridCellParams) => {
-        if (fieldErrors[params.field]) return 'Mui-error';
+        if (fieldErrors[Number(params.id)]?.[params.field]) return 'Mui-error';
         return '';
     };
 
@@ -248,6 +275,12 @@ function ClientListMUI() {
 
     const handleFilterModelChange = (model: GridFilterModel) => {
         setFilterModel(model);
+    };
+
+    const handleProcessRowUpdateError = (error: any) => {
+        if (lastEditingRowId.current != null) {
+            setRowModesModel(prev => ({ ...prev, [lastEditingRowId.current!]: { mode: GridRowModes.Edit } }));
+        }
     };
 
     return (
@@ -265,6 +298,7 @@ function ClientListMUI() {
                 processRowUpdate={processRowUpdate}
                 onRowClick={handleRowClick}
                 onRowEditStop={handleRowEditStop}
+                onProcessRowUpdateError={handleProcessRowUpdateError}
                 slots={{ toolbar: CustomToolbar }}
                 filterModel={filterModel}
                 onFilterModelChange={handleFilterModelChange}

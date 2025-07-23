@@ -73,7 +73,6 @@ export const clientService = {
         body: JSON.stringify(client),
       })
     );
-    if (!response.success) throw new Error(response.message || 'API error');
     return response.data!;
   },
 
@@ -87,7 +86,6 @@ export const clientService = {
         body: JSON.stringify(client),
       })
     );
-    if (!response.success) throw new Error(response.message || 'API error');
     return response.data!;
   },
 
