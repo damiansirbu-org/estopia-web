@@ -1,7 +1,7 @@
 // Domain Models matching backend DTOs exactly
 
 export interface Client {
-  id?: number;
+  id: number;
   firstName: string;
   lastName: string;
   phoneNumber?: string;
@@ -13,7 +13,7 @@ export interface Client {
 }
 
 export interface Asset {
-  id?: number;
+  id: number;
   name: string;
   address: string;
   description?: string;
@@ -31,7 +31,7 @@ export interface Asset {
 }
 
 export interface Contract {
-  id?: number;
+  id: number;
   clientId: number;
   assetId: number;
   startDate: string; // LocalDate in backend
@@ -46,7 +46,7 @@ export interface Contract {
 }
 
 export interface Payment {
-  id?: number;
+  id: number;
   contractId: number;
   dueDate: string; // LocalDate in backend
   rentAmount: number;
