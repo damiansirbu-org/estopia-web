@@ -104,21 +104,21 @@ export default function ErrorProvider({ children }: ErrorProviderProps) {
     const [notification, setNotification] = useState<Notification | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const showError = (message: string): void => {
+    const showError = useCallback((message: string): void => {
         setNotification({ type: 'error', message });
-    };
+    }, []);
 
-    const showSuccess = (message: string): void => {
+    const showSuccess = useCallback((message: string): void => {
         setNotification({ type: 'success', message });
-    };
+    }, []);
 
-    const showInfo = (message: string): void => {
+    const showInfo = useCallback((message: string): void => {
         setNotification({ type: 'info', message });
-    };
+    }, []);
 
-    const clearNotification = (): void => {
+    const clearNotification = useCallback((): void => {
         setNotification(null);
-    };
+    }, []);
 
     const withErrorHandling = useCallback(async <T,>(
         asyncFunction: () => Promise<T>,

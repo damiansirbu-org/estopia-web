@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useError } from '../context/useError';
 import { clientService } from '../services/api';
 import type { Client, CreateClientRequest, UpdateClientRequest } from '../types/models';
+import type { FilterType } from './common/ColumnFilterPopover';
+import TableSortHeader from './common/TableSortHeader';
 
 function ClientList() {
   const { withErrorHandling, loading } = useError();
@@ -17,12 +19,82 @@ function ClientList() {
   });
   const [editData, setEditData] = useState<Partial<Client>>({});
 
+  const filterFields = [
+    'id',
+    'firstName',
+    'lastName',
+    'email',
+    'phoneNumber',
+    'address',
+  ];
+
+  // Add a separate state for filter inputs (pendingFilters) and only apply them to columnFilters when Filter is clicked
+  const [pendingFilters, setPendingFilters] = useState<Record<string, string>>({});
+  // Per-column filter state: { field: { type, value } }
+  const [columnFilters, setColumnFilters] = useState<Record<string, { type: FilterType, value: string }>>({});
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<string>('id');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const handlePendingFilterChange = (field: string, value: string) => {
+    setPendingFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleColumnFilterChange = (field: string, type: FilterType, value: string) => {
+    setColumnFilters((prev) => ({ ...prev, [field]: { type, value } }));
+  };
+
+  const handleApplyColumnFilter = () => {
+    // Only include fields with non-empty values in the filters object
+    const newFilters: Record<string, { type: FilterType, value: string }> = {};
+    for (const field of filterFields) {
+      const value = pendingFilters[field] || '';
+      if (value.trim() !== '') {
+        newFilters[field] = { type: 'like', value };
+      }
+    }
+    setColumnFilters(newFilters);
+  };
+
+  const handleClearColumnFilter = () => {
+    setPendingFilters({});
+    setColumnFilters({});
+  };
+
+  const setFiltersFromColumnFilters = () => {
+    // This function can be used to map columnFilters to the filter DTO structure for the API call
+    // For now, just triggers useEffect by updating a dummy state if needed
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Debounce filter changes
+  useEffect(() => {
+    loadClients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilters, sortField, sortDirection]);
+
   const loadClients = useCallback(async () => {
     await withErrorHandling(async () => {
-      const data = await clientService.getAllClients();
+      // Build filter DTO for API
+      const filters: Record<string, { type: FilterType, value: string }> = {};
+      for (const field of filterFields) {
+        const f = columnFilters[field];
+        if (f && f.value.trim() !== '') {
+          filters[field] = f;
+        }
+      }
+      const data = await clientService.getAllClients({ filters, sortField, sortDirection });
       setClients(data);
     });
-  }, [withErrorHandling]);
+  }, [withErrorHandling, columnFilters, sortField, sortDirection]);
 
   useEffect(() => {
     loadClients();
@@ -130,97 +202,137 @@ function ClientList() {
 
   return (
     <div className="p-6">
-      <div className="mb-4">
-        <button
-          onClick={handleAddClient}
-          disabled={loading || isAdding}
-          className="text-blue-600 hover:text-blue-900 text-sm font-medium disabled:opacity-50"
-        >
-          + Add Client
-        </button>
-      </div>
-
       <div className="bg-white rounded-lg shadow">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              {filterFields.map((field) => (
+                <TableSortHeader key={field} label={field.charAt(0).toUpperCase() + field.slice(1)} field={field} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
+              ))}
+              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider align-middle text-center" style={{ padding: '12px 2px' }}>
+              </th>
+              <th className="text-xs font-medium text-gray-500 uppercase tracking-wider align-middle text-center" style={{ padding: '12px 2px' }}></th>
+            </tr>
+            <tr className="bg-white align-middle">
+              {filterFields.map((field) => (
+                <td key={field} className="px-6 py-2 align-middle">
+                  <input
+                    type="text"
+                    value={pendingFilters[field] || ''}
+                    onChange={e => handlePendingFilterChange(field, e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                    placeholder={`Filter ${field}`}
+                    style={{ minWidth: 80 }}
+                  />
+                </td>
+              ))}
+              <td className="align-middle text-center" style={{ padding: '8px 2px' }}>
+                <button
+                  onClick={handleApplyColumnFilter}
+                  className="px-2 py-1 bg-transparent text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                >
+                  Filter
+                </button>
+              </td>
+              <td className="align-middle text-center" style={{ padding: '8px 2px' }}>
+                <button
+                  onClick={handleClearColumnFilter}
+                  className="px-2 py-1 bg-transparent text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                >
+                  Clear
+                </button>
+              </td>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
+            <tr>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4"></td>
+              <td className="whitespace-nowrap text-center" style={{ padding: '16px 2px' }}>
+                <button
+                  onClick={handleAddClient}
+                  className="px-2 py-1 bg-transparent text-xs font-medium text-gray-600 hover:text-black hover:bg-gray-100 rounded transition-colors"
+                >
+                  Add
+                </button>
+              </td>
+              <td style={{ padding: '16px 2px' }}></td>
+            </tr>
+
             {isAdding && (
               <tr className="bg-blue-50 border-l-4 border-blue-500">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">New</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="text"
-                    value={newClient.firstName}
-                    onChange={(e) => setNewClient({ ...newClient, firstName: e.target.value })}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="First name *"
-                    disabled={loading}
-                    required
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="text"
-                    value={newClient.lastName}
-                    onChange={(e) => setNewClient({ ...newClient, lastName: e.target.value })}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Last name *"
-                    disabled={loading}
-                    required
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="email"
-                    value={newClient.email || ''}
-                    onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Email (optional)"
-                    disabled={loading}
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="tel"
-                    value={newClient.phoneNumber || ''}
-                    onChange={(e) => setNewClient({ ...newClient, phoneNumber: e.target.value })}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Phone (optional)"
-                    disabled={loading}
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="text"
-                    value={newClient.address || ''}
-                    onChange={(e) => setNewClient({ ...newClient, address: e.target.value })}
-                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Address (optional)"
-                    disabled={loading}
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {filterFields.map((field) => (
+                  <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {field === 'id' ? '' : (
+                      field === 'firstName' ? (
+                        <input
+                          type="text"
+                          value={newClient.firstName}
+                          onChange={(e) => setNewClient({ ...newClient, firstName: e.target.value })}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          placeholder="First name *"
+                          disabled={loading}
+                          required
+                        />
+                      ) : field === 'lastName' ? (
+                        <input
+                          type="text"
+                          value={newClient.lastName}
+                          onChange={(e) => setNewClient({ ...newClient, lastName: e.target.value })}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          placeholder="Last name *"
+                          disabled={loading}
+                          required
+                        />
+                      ) : field === 'email' ? (
+                        <input
+                          type="email"
+                          value={newClient.email || ''}
+                          onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          placeholder="Email (optional)"
+                          disabled={loading}
+                        />
+                      ) : field === 'phoneNumber' ? (
+                        <input
+                          type="tel"
+                          value={newClient.phoneNumber || ''}
+                          onChange={(e) => setNewClient({ ...newClient, phoneNumber: e.target.value })}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          placeholder="Phone (optional)"
+                          disabled={loading}
+                        />
+                      ) : field === 'address' ? (
+                        <input
+                          type="text"
+                          value={newClient.address || ''}
+                          onChange={(e) => setNewClient({ ...newClient, address: e.target.value })}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                          placeholder="Address (optional)"
+                          disabled={loading}
+                        />
+                      ) : null
+                    )}
+                  </td>
+                ))}
+                <td className="whitespace-nowrap text-center" style={{ padding: '16px 2px' }}>
                   <button
                     onClick={handleSaveClient}
                     disabled={loading}
-                    className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
+                    className="px-2 py-1 bg-transparent text-xs font-medium text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors disabled:opacity-50"
                   >
                     Save
                   </button>
+                </td>
+                <td className="whitespace-nowrap text-center" style={{ padding: '16px 2px' }}>
                   <button
                     onClick={handleCancelAdd}
                     disabled={loading}
-                    className="text-gray-600 hover:text-gray-900 disabled:opacity-50"
+                    className="px-2 py-1 bg-transparent text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -296,39 +408,40 @@ function ClientList() {
                     client.address || '-'
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="whitespace-nowrap text-center" style={{ padding: '16px 2px' }}>
                   {editingId === client.id ? (
-                    <>
-                      <button
-                        onClick={handleSaveEdit}
-                        disabled={loading}
-                        className="text-blue-600 hover:text-blue-900 mr-3 disabled:opacity-50"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        disabled={loading}
-                        className="text-gray-600 hover:text-gray-900 disabled:opacity-50"
-                      >
-                        Cancel
-                      </button>
-                    </>
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={loading}
+                      className="px-2 py-1 bg-transparent text-xs font-medium text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors disabled:opacity-50"
+                    >
+                      Save
+                    </button>
                   ) : (
-                    <>
-                      <button
-                        onClick={() => handleEdit(client)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(client.id!)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </>
+                    <button
+                      onClick={() => handleEdit(client)}
+                      className="px-2 py-1 bg-transparent text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </td>
+                <td className="whitespace-nowrap text-center" style={{ padding: '16px 2px' }}>
+                  {editingId === client.id ? (
+                    <button
+                      onClick={handleCancelEdit}
+                      disabled={loading}
+                      className="px-2 py-1 bg-transparent text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDelete(client.id!)}
+                      className="px-2 py-1 bg-transparent text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                    >
+                      Delete
+                    </button>
                   )}
                 </td>
               </tr>
@@ -339,7 +452,7 @@ function ClientList() {
 
       {clients.length === 0 && !loading && (
         <div className="text-center py-8 text-gray-500">
-          No clients found. Click "Add Client" to create one.
+          No clients found. Click "Add" to create one.
         </div>
       )}
 

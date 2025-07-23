@@ -1,7 +1,11 @@
-import React from 'react';
-import { Home, Building2, Users, FileText, DollarSign, Settings } from 'lucide-react';
+import { Building2, DollarSign, FileText, Home, Settings, Users } from 'lucide-react';
 
-function Header({ activeTab, setActiveTab }) {
+interface HeaderProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+function Header({ activeTab, setActiveTab }: HeaderProps) {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'assets', label: 'Assets', icon: Building2 },
@@ -26,11 +30,10 @@ function Header({ activeTab, setActiveTab }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === tab.id
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === tab.id
                       ? 'bg-gray-600 text-white'
                       : 'text-gray-300 hover:bg-gray-600 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Icon className="h-4 w-4 mr-2" />
                   {tab.label}
@@ -41,7 +44,7 @@ function Header({ activeTab, setActiveTab }) {
 
           {/* Logo and User Menu */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl text-white tracking-widest" style={{fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.5)'}}>ESTOPIA</h1>
+            <h1 className="text-2xl text-white tracking-widest" style={{ fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>ESTOPIA</h1>
             <button className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-md">
               <Settings className="h-5 w-5" />
             </button>

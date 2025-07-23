@@ -1,26 +1,62 @@
-import { apiCall } from '../utils/ErrorHandler';
+import type { FilterType } from '../components/common/ColumnFilterPopover';
 import type {
-  Client, Asset, Contract, Payment,
-  CreateClientRequest, UpdateClientRequest,
-  CreateAssetRequest, UpdateAssetRequest,
-  CreateContractRequest, UpdateContractRequest,
-  CreatePaymentRequest, UpdatePaymentRequest
+  Asset,
+  Client,
+  Contract,
+  CreateAssetRequest,
+  CreateClientRequest,
+  CreateContractRequest,
+  CreatePaymentRequest,
+  Payment,
+  UpdateAssetRequest,
+  UpdateClientRequest,
+  UpdateContractRequest,
+  UpdatePaymentRequest
 } from '../types/models';
+import { apiCall } from '../utils/ErrorHandler';
 
 // API Base URL
 const API_BASE_URL = 'http://localhost:8080/api';
 
 // Client API Service
 export const clientService = {
-  async getAllClients(): Promise<Client[]> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/clients`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
+  async getAllClients(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Client[]> {
+    if (params && params.filters && Object.keys(params.filters).length > 0) {
+      // Use POST /api/clients/filter for filtering
+      const filterDTO = { filters: params.filters };
+      // Build query string for sort params
+      const query: string[] = [];
+      if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      return apiCall(() =>
+        fetch(`${API_BASE_URL}/clients/filter${queryString}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(filterDTO),
+        })
+      );
+    } else {
+      // No filters: use GET /api/clients with optional sort params
+      const query: string[] = [];
+      if (params?.sortField) {
+        query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      }
+      if (params?.sortDirection) {
+        query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      }
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      return apiCall(() =>
+        fetch(`${API_BASE_URL}/clients${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+    }
   },
 
   async createClient(client: CreateClientRequest): Promise<Client> {
