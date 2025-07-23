@@ -23,7 +23,6 @@ function ClientList() {
   const tableRef = useRef<HTMLDivElement>(null);
   const [addFieldErrors, setAddFieldErrors] = useState<Record<string, string>>({});
   const [editFieldErrors, setEditFieldErrors] = useState<Record<string, string>>({});
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const filterFields = useMemo(() => [
@@ -280,10 +279,10 @@ function ClientList() {
   useEffect(() => { setEditFieldErrors({}); }, [editingId]);
 
   // Helper pentru accesare dinamică fielduri tipate
-  function getField<T extends object>(obj: T, field: string): any {
-    return (obj as any)[field];
+  function getField<T extends object, K extends keyof T>(obj: T, field: K): T[K] {
+    return obj[field];
   }
-  function setField<T extends object>(obj: T, field: string, value: any): T {
+  function setField<T extends object, K extends keyof T>(obj: T, field: K, value: T[K]): T {
     return { ...obj, [field]: value };
   }
 
@@ -370,11 +369,12 @@ function ClientList() {
                   <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <input
                       type={field === 'email' ? 'email' : field === 'phoneNumber' ? 'tel' : 'text'}
-                      value={getField(newClient, field) || ''}
+                      value={getField(newClient, field as keyof typeof newClient) || ''}
                       onChange={e => {
-                        setNewClient(setField(newClient, field, e.target.value));
+                        setNewClient(setField(newClient, field as keyof typeof newClient, e.target.value));
                         if (addFieldErrors[field]) {
-                          const { [field]: _, ...rest } = addFieldErrors;
+                          const rest = { ...addFieldErrors };
+                          delete rest[field];
                           setAddFieldErrors(rest);
                         }
                       }}
@@ -401,14 +401,14 @@ function ClientList() {
                     {editingId === client.id ? (
                       <input
                         type={field === 'email' ? 'email' : field === 'phoneNumber' ? 'tel' : 'text'}
-                        value={getField(editData, field) || ''}
-                        onChange={e => setEditData(setField(editData, field, e.target.value))}
+                        value={getField(editData, field as keyof typeof editData) || ''}
+                        onChange={e => setEditData(setField(editData, field as keyof typeof editData, e.target.value))}
                         className={`w-full px-2 py-1 border ${editFieldErrors[field] ? 'border-red-500' : 'border-gray-300'} rounded text-sm`}
                         disabled={loading}
                         autoFocus={field === 'firstName'}
                       />
                     ) : (
-                      getField(client, field) || (field === 'nationalId' ? '-' : '-')
+                      getField(client, field as keyof typeof client) || (field === 'nationalId' ? '-' : '-')
                     )}
                   </td>
                 ))}
