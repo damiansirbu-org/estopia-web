@@ -23,6 +23,8 @@ function ClientList() {
   const tableRef = useRef<HTMLDivElement>(null);
   const [addFieldErrors, setAddFieldErrors] = useState<Record<string, string>>({});
   const [editFieldErrors, setEditFieldErrors] = useState<Record<string, string>>({});
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const filterFields = useMemo(() => [
     'firstName',
@@ -206,6 +208,20 @@ function ClientList() {
     setEditFieldErrors({});
   };
 
+  const handleDelete = useCallback(async () => {
+    if (editingId) {
+      await withErrorHandling(async () => {
+        await clientService.deleteClient(editingId);
+        setClients(clients.filter(c => c.id !== editingId));
+        setEditingId(null);
+        setEditData({});
+        setDeleteConfirm(false);
+      });
+    }
+  }, [editingId, clients, withErrorHandling]);
+
+  const handleCancelDelete = () => setDeleteConfirm(false);
+
   // Handle clicks outside to act as ENTER
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -313,22 +329,43 @@ function ClientList() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {/* Add row - click to add */}
-            <tr
-              onClick={handleAddClient}
-              className="cursor-pointer hover:bg-blue-50 border-l-4 border-dashed border-blue-300 hover:border-blue-500 transition-all duration-200 bg-gray-50 outline-none focus:outline-none"
-              style={{ outline: 'none', border: 'none' }}
-            >
-              {filterFields.map((field, index) => (
-                <td key={field} className="px-6 py-4 text-sm text-gray-500 italic font-medium outline-none focus:outline-none" style={{ outline: 'none' }}>
-                  {index === 0 ? '+ Click to add new client...' : ''}
+            {/* Add/Delete/Confirm row */}
+            {editingId === null && !isAdding && !deleteConfirm && (
+              <tr
+                onClick={handleAddClient}
+                className="cursor-pointer hover:bg-green-100 border-l-4 border-dashed border-green-400 hover:border-green-600 transition-all duration-200 bg-green-50 outline-none focus:outline-none"
+                style={{ outline: 'none', border: 'none' }}
+              >
+                {filterFields.map((field, index) => (
+                  <td key={field} className="px-6 py-4 text-sm text-gray-500 italic font-medium outline-none focus:outline-none" style={{ outline: 'none' }}>
+                    {index === 0 ? '+ Click to add new client...' : ''}
+                  </td>
+                ))}
+              </tr>
+            )}
+            {editingId !== null && !deleteConfirm && (
+              <tr
+                onClick={() => setDeleteConfirm(true)}
+                className="cursor-pointer hover:bg-red-100 border-l-4 border-dashed border-red-400 hover:border-red-600 transition-all duration-200 bg-red-50 outline-none focus:outline-none"
+                style={{ outline: 'none', border: 'none' }}
+              >
+                {filterFields.map((field, index) => (
+                  <td key={field} className="px-6 py-4 text-sm text-red-700 italic font-medium outline-none focus:outline-none" style={{ outline: 'none' }}>
+                    {index === 0 ? 'Click to delete this client...' : ''}
+                  </td>
+                ))}
+              </tr>
+            )}
+            {editingId !== null && deleteConfirm && (
+              <tr className="bg-red-50 border-l-4 border-red-400 animate-pulse">
+                <td colSpan={filterFields.length} className="px-6 py-4 text-center text-sm text-red-700 font-semibold">
+                  Confirm delete? <span className="underline cursor-pointer" onClick={handleDelete}>Yes</span> | <span className="underline cursor-pointer" onClick={handleCancelDelete}>Cancel</span>
                 </td>
-              ))}
-            </tr>
-
+              </tr>
+            )}
             {/* Add form row */}
             {isAdding && (
-              <tr className="bg-blue-50 border-l-4 border-blue-500" onKeyDown={handleAddKeyDown}>
+              <tr className="bg-green-50 border-l-4 border-green-400" onKeyDown={handleAddKeyDown}>
                 {filterFields.map((field) => (
                   <td key={field} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <input
@@ -350,7 +387,6 @@ function ClientList() {
                 ))}
               </tr>
             )}
-
             {/* Client rows */}
             {clients.map((client) => (
               <tr
