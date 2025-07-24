@@ -80,14 +80,14 @@ function ClientListMUI() {
                 }
                 return params.value as string;
             },
-            renderEditCell: (params: GridCellParams<Client>) => {
-                const error = fieldErrors[Number(params.id)]?.[params.field];
+            renderEditCell: (params: import('@mui/x-data-grid').GridCellParams<Client>) => {
+                const cellError = fieldErrors[Number(params.id)]?.[params.field];
                 return (
                     <TextField
                         value={params.value ?? ''}
                         onChange={e => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value }, e)}
-                        error={!!error}
-                        helperText={error}
+                        error={!!cellError}
+                        helperText={cellError}
                         size="small"
                         variant="standard"
                         fullWidth
@@ -277,7 +277,7 @@ function ClientListMUI() {
         setFilterModel(model);
     };
 
-    const handleProcessRowUpdateError = (error: any) => {
+    const handleProcessRowUpdateError = () => {
         if (lastEditingRowId.current != null) {
             setRowModesModel(prev => ({ ...prev, [lastEditingRowId.current!]: { mode: GridRowModes.Edit } }));
         }

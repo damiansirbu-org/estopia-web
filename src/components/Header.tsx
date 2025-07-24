@@ -1,4 +1,4 @@
-import { Building2, DollarSign, FileText, Home, Settings, Users } from 'lucide-react';
+import { Building2, DollarSign, FileText, Home, Settings, Table, Users } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: string;
@@ -11,6 +11,7 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
     { id: 'assets', label: 'Assets', icon: Building2 },
     { id: 'clients', label: 'Clients', icon: Users },
     { id: 'clients-mui', label: 'Clients (MUI)', icon: Users },
+    { id: 'clients-antd', label: 'Clients (AntD)', icon: Table },
     { id: 'contracts', label: 'Contracts', icon: FileText },
     { id: 'payments', label: 'Payments', icon: DollarSign },
   ];

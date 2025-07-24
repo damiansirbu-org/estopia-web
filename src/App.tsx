@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import AssetList from './components/AssetList';
 import ClientList from './components/ClientList';
+import ClientListAntd from './components/ClientListAntd';
 import ClientListMUI from './components/ClientListMUI';
+import TerminalPanel from './components/common/TerminalPanel';
 import ContractList from './components/ContractList';
 import Header from './components/Header';
 import PaymentList from './components/PaymentList';
 import ErrorProvider from './context/ErrorProvider';
+import { TerminalProvider, useTerminal } from './context/TerminalContext';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import { DataGridStyleProvider } from './theme/DataGridStyleProvider';
@@ -23,6 +26,8 @@ function AppContent() {
         return <ClientList />;
       case 'clients-mui':
         return <ClientListMUI />;
+      case 'clients-antd':
+        return <ClientListAntd />;
       case 'contracts':
         return <ContractList />;
       case 'payments':
@@ -44,11 +49,25 @@ function AppContent() {
   );
 }
 
+function AppShell({ children }: { children: React.ReactNode }) {
+  const { messages, clear, copy } = useTerminal();
+  return (
+    <>
+      {children}
+      <TerminalPanel messages={messages} onClear={clear} onCopy={copy} />
+    </>
+  );
+}
+
 function App() {
   return (
     <DataGridStyleProvider>
       <ErrorProvider>
-        <AppContent />
+        <TerminalProvider>
+          <AppShell>
+            <AppContent />
+          </AppShell>
+        </TerminalProvider>
       </ErrorProvider>
     </DataGridStyleProvider>
   );
