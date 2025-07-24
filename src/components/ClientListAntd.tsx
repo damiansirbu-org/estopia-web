@@ -1,5 +1,5 @@
 import { DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Modal, Space, Spin, Table, Typography } from 'antd';
+import { Button, Form, Input, Space, Spin, Table, Typography } from 'antd';
 import type { ColumnsType, FilterDropdownProps, FilterValue, SorterResult, TableCurrentDataSource, TablePaginationConfig } from 'antd/es/table/interface';
 import { useEffect, useState } from 'react';
 import type { FilterType } from '../components/common/ColumnFilterPopover';
@@ -26,7 +26,7 @@ function getColumnSearchProps(dataIndex: keyof Client) {
                     <Button
                         type="primary"
                         onClick={() => confirm()}
-                        icon={<SearchOutlined />}
+                        icon={<SearchOutlined style={{ fontSize: 18 }} />}
                         size="small"
                         style={{ width: 90 }}
                     >
@@ -42,7 +42,7 @@ function getColumnSearchProps(dataIndex: keyof Client) {
                 </Space>
             </div>
         ),
-        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined, fontSize: 18 }} />,
         onFilter: (value: string | number | boolean | bigint, record: Client) => {
             const cell = record[dataIndex];
             return cell ? String(cell).toLowerCase().includes(String(value).toLowerCase()) : false;
@@ -61,8 +61,6 @@ export default function ClientListAntd() {
     const [fieldErrors, setFieldErrors] = useState<Record<number, Record<string, string>>>({});
     const [form] = Form.useForm();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    // Track which field should be auto-focused
-    const [focusField, setFocusField] = useState<string | null>(null);
 
     const fetchClients = async (params?: { sortField?: string; sortDirection?: 'asc' | 'desc'; filters?: Record<string, { type: FilterType; value: string }> }) => {
         setLoading(true);
@@ -117,7 +115,6 @@ export default function ClientListAntd() {
         form.setFieldsValue({ ...record });
         setEditingKey(record.id);
         setFieldErrors({});
-        setFocusField(null);
     };
 
     const cancel = () => {
@@ -132,7 +129,6 @@ export default function ClientListAntd() {
         const existingAddRow = clients.find(c => c.id < 0);
         if (existingAddRow) {
             edit(existingAddRow);
-            setFocusField('firstName');
             return;
         }
         const newClient = {
@@ -148,7 +144,6 @@ export default function ClientListAntd() {
         form.setFieldsValue(newClient);
         setEditingKey(newClient.id);
         setFieldErrors({});
-        setFocusField('firstName');
     };
 
     // Delete handler: delete the currently edited client
@@ -242,9 +237,6 @@ export default function ClientListAntd() {
                                 if (e.key === 'Enter') save(record.id);
                                 if (e.key === 'Escape') cancel();
                             }}
-                            onBlur={() => save(record.id)}
-                            autoFocus={focusField === field}
-                            onFocus={() => focusField === field && setFocusField(null)}
                         />
                     </Form.Item>
                 ) : (
@@ -259,11 +251,35 @@ export default function ClientListAntd() {
             <Space direction="vertical" size="large" style={{ width: '100%', marginTop: 24 }}>
                 <Title level={3}>Clients (Ant Design)</Title>
                 <Space style={{ marginBottom: 12 }}>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>Add</Button>
-                    {editingKey !== null && (
+                    <Button
+                        type="default"
+                        icon={<PlusOutlined />}
+                        onClick={handleAdd}
+                        style={{
+                            background: '#fafafa',
+                            border: '1px solid #bdbdbd',
+                            color: '#333',
+                            fontWeight: 500,
+                        }}
+                    >
+                        Add
+                    </Button>
+                    {editingKey !== null && editingKey < 0 && (
+                        <>
+                            <Button type="primary" onClick={() => save(editingKey)} style={{ fontWeight: 500 }}>Yes</Button>
+                            <Button onClick={cancel} style={{ marginLeft: 4 }}>No</Button>
+                        </>
+                    )}
+                    {editingKey !== null && editingKey > 0 && !showDeleteConfirm && (
                         <Button icon={<DeleteOutlined />} danger onClick={() => setShowDeleteConfirm(true)}>
                             Delete
                         </Button>
+                    )}
+                    {editingKey !== null && editingKey > 0 && showDeleteConfirm && (
+                        <>
+                            <Button danger onClick={handleDelete} style={{ fontWeight: 500 }}>Yes</Button>
+                            <Button onClick={() => setShowDeleteConfirm(false)} style={{ marginLeft: 4 }}>No</Button>
+                        </>
                     )}
                 </Space>
                 <Spin spinning={loading} tip="Loading clients...">
@@ -286,17 +302,38 @@ export default function ClientListAntd() {
                         })}
                     />
                 </Spin>
-                <Modal
-                    open={showDeleteConfirm}
-                    title="Are you sure you want to delete this client?"
-                    onOk={handleDelete}
-                    onCancel={() => setShowDeleteConfirm(false)}
-                    okText="Yes"
-                    cancelText="No"
-                >
-                    This action cannot be undone.
-                </Modal>
             </Space>
+            <style>{`
+  .ant-pagination .ant-pagination-item-active {
+    background: #f5f5f5 !important;
+    border-color: #bdbdbd !important;
+  }
+  .ant-pagination .ant-pagination-item-active a {
+    color: #333 !important;
+  }
+  .ant-pagination .ant-pagination-item a {
+    color: #555;
+  }
+  .ant-pagination .ant-pagination-item:hover {
+    border-color: #888 !important;
+  }
+  .ant-pagination .ant-pagination-item-active {
+    font-weight: bold;
+  }
+  .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+  .ant-pagination .ant-pagination-prev .ant-pagination-item-link {
+    color: #555 !important;
+    border-color: #bdbdbd !important;
+    background: #fafafa !important;
+  }
+  /* Make sort icons in table headers bigger */
+  .ant-table-column-sorter-up svg,
+  .ant-table-column-sorter-down svg {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+`}</style>
         </Form>
     );
 } 

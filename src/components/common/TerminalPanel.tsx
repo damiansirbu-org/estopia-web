@@ -40,14 +40,51 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({ messages, onClear, onCopy
             flexDirection: 'column',
             boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
         }}>
-            <div style={{ padding: '4px 12px', borderBottom: '1px solid #e0e0e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafafa' }}>
-                <span style={{ fontFamily: 'monospace', color: '#b22222', fontWeight: 'bold', letterSpacing: 2, fontSize: 16 }}>
-                    {'==================[ ЗОНА СВЯЗИ ]=================='}
-                </span>
-                <span>
-                    <button onClick={onCopy} style={{ marginRight: 8 }}>Copy</button>
-                    <button onClick={onClear}>Clear</button>
-                </span>
+            {/* Top bar with separator and left-aligned buttons */}
+            <div style={{
+                padding: '4px 12px',
+                borderBottom: '1px solid #e0e0e0',
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                background: '#fafafa',
+                minHeight: 32,
+            }}>
+                <button
+                    onClick={onCopy}
+                    title="Copy all messages"
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#555',
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        marginRight: 8,
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        transition: 'background 0.2s',
+                    }}
+                    aria-label="Copy"
+                >
+                    Copy
+                </button>
+                <button
+                    onClick={onClear}
+                    title="Clear messages"
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#555',
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        transition: 'background 0.2s',
+                    }}
+                    aria-label="Clear"
+                >
+                    Clear
+                </button>
             </div>
             <div ref={panelRef} style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
                 {messages.length === 0 ? (
