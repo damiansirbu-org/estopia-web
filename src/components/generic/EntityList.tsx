@@ -1,27 +1,28 @@
 import { CheckOutlined, CloseOutlined, MinusOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Space, Spin, Table, Typography } from 'antd';
 import type { ColumnsType, FilterDropdownProps, FilterValue, SorterResult, TableCurrentDataSource, TablePaginationConfig } from 'antd/es/table/interface';
-import { useEffect, useState } from 'react';
-import { CLIENT_COLUMNS } from '../constants/clientColumns';
-import type { FilterType } from '../components/common/ColumnFilterPopover';
-import { useTerminal } from '../context/useTerminal';
-import { clientService } from '../services/api';
-import { tableConfig } from '../theme/tokens';
+import { useCallback, useEffect, useState } from 'react';
+import type { FilterType } from '../common/ColumnFilterPopover';
+import { useTerminal } from '../../context/useTerminal';
+import { tableConfig } from '../../theme/tokens';
 import {
   createButtonGroupStyle,
-  createButtonStyle,
   createFormItemStyle,
   createIconStyle,
   createLayoutStyle,
   createSearchDropdownStyle,
   createSearchInputStyle,
-} from '../theme/styleHelpers';
-import type { Client, UpdateClientRequest } from '../types/models';
-import { EstopiaError } from '../utils/ErrorHandler';
+} from '../../theme/styleHelpers';
+import type { BaseEntity, EntityConfig } from '../../types/entity/entityConfig';
+import { EstopiaError } from '../../utils/ErrorHandler';
 
 const { Title } = Typography;
 
-function getColumnSearchProps(dataIndex: keyof Client, title: string) {
+interface EntityListProps<T extends BaseEntity, CreateT, UpdateT> {
+  config: EntityConfig<T, CreateT, UpdateT>;
+}
+
+function getColumnSearchProps<T extends BaseEntity>(dataIndex: keyof T, title: string) {
     return {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps) => (
             <div style={createSearchDropdownStyle()}>
@@ -54,16 +55,18 @@ function getColumnSearchProps(dataIndex: keyof Client, title: string) {
             </div>
         ),
         filterIcon: (_filtered: boolean) => <SearchOutlined style={createIconStyle()} />,
-        onFilter: (value: string | number | boolean | bigint, record: Client) => {
+        onFilter: (value: string | number | boolean | bigint, record: T) => {
             const cell = record[dataIndex];
             return cell ? String(cell).toLowerCase().includes(String(value).toLowerCase()) : false;
         },
     };
 }
 
-export default function ClientListAntd() {
+export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({ 
+  config 
+}: EntityListProps<T, CreateT, UpdateT>) {
     const { push } = useTerminal();
-    const [clients, setClients] = useState<Client[]>([]);
+    const [entities, setEntities] = useState<T[]>([]);
     const [loading, setLoading] = useState(false);
     const [sortField, setSortField] = useState<string | undefined>(undefined);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | undefined>(undefined);
@@ -76,19 +79,19 @@ export default function ClientListAntd() {
     const [hasChanges, setHasChanges] = useState(false);
     const [originalValues, setOriginalValues] = useState<Record<string, unknown>>({});
 
-    const fetchClients = async (params?: { sortField?: string; sortDirection?: 'asc' | 'desc'; filters?: Record<string, { type: FilterType; value: string }> }) => {
+    const fetchEntities = useCallback(async (params?: { sortField?: string; sortDirection?: 'asc' | 'desc'; filters?: Record<string, { type: FilterType; value: string }> }) => {
         setLoading(true);
         try {
-            const data = await clientService.getAllClients(params || {});
-            setClients(data);
+            const data = await config.service.getAll(params || {});
+            setEntities(data);
         } finally {
             setLoading(false);
         }
-    };
+    }, [config.service]);
 
     useEffect(() => {
-        fetchClients({ sortField, sortDirection, filters });
-    }, [sortField, sortDirection, filters]);
+        fetchEntities({ sortField, sortDirection, filters });
+    }, [sortField, sortDirection, filters, fetchEntities]);
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -102,8 +105,8 @@ export default function ClientListAntd() {
     const handleTableChange = (
         _pagination: TablePaginationConfig,
         tableFilters: Record<string, FilterValue | null>,
-        sorter: SorterResult<Client> | SorterResult<Client>[],
-        _extra: TableCurrentDataSource<Client>
+        sorter: SorterResult<T> | SorterResult<T>[],
+        _extra: TableCurrentDataSource<T>
     ) => {
         // Sorting
         let sortField: string | undefined;
@@ -131,9 +134,9 @@ export default function ClientListAntd() {
         setFilters(Object.keys(newFilters).length > 0 ? newFilters : undefined);
     };
 
-    const isEditing = (record: Client) => record.id === editingKey;
+    const isEditing = (record: T) => record.id === editingKey;
 
-    const edit = (record: Client) => {
+    const edit = (record: T) => {
         const values = { ...record };
         form.setFieldsValue(values);
         setEditingKey(record.id);
@@ -153,46 +156,41 @@ export default function ClientListAntd() {
     const handleAdd = () => {
         if (editingKey !== null) return; // Only one edit at a time
         // Prevent multiple negative-ID add rows
-        const existingAddRow = clients.find(c => c.id < 0);
+        const existingAddRow = entities.find(e => e.id < 0);
         if (existingAddRow) {
             edit(existingAddRow);
             return;
         }
-        const newClient: Client = {
+        const newEntity: T = {
+            ...config.createEmpty(),
             id: -Math.floor(Math.random() * 1e6), // temp negative id
-            firstName: '',
-            lastName: '',
-            nationalId: '',
-            email: '',
-            phoneNumber: '',
-            address: '',
         };
-        setClients([newClient, ...clients]);
-        form.setFieldsValue(newClient);
-        setEditingKey(newClient.id);
+        setEntities([newEntity, ...entities]);
+        form.setFieldsValue(newEntity);
+        setEditingKey(newEntity.id);
         setFieldErrors({});
-        setOriginalValues({ ...newClient } as Record<string, unknown>);
+        setOriginalValues({ ...newEntity } as Record<string, unknown>);
         setHasChanges(true); // New rows always have "changes" (they need to be saved)
     };
 
-    // Delete handler: delete the currently edited client
+    // Delete handler: delete the currently edited entity
     const handleDelete = async () => {
         if (editingKey === null) return;
         setLoading(true);
         setShowDeleteConfirm(false);
         try {
-            const client = clients.find(c => c.id === editingKey);
-            if (!client) return;
-            if (client.id < 0) {
+            const entity = entities.find(e => e.id === editingKey);
+            if (!entity) return;
+            if (entity.id < 0) {
                 // New unsaved row, just remove from UI
-                setClients(clients.filter(c => c.id !== client.id));
+                setEntities(entities.filter(e => e.id !== entity.id));
                 setEditingKey(null);
                 return;
             }
-            await clientService.deleteClient(client.id);
+            await config.service.delete(entity.id);
             setEditingKey(null);
-            fetchClients({ sortField, sortDirection, filters });
-            push('Client deleted', 'success');
+            fetchEntities({ sortField, sortDirection, filters });
+            push(`${config.name} deleted`, 'success');
         } catch {
             push('Delete failed', 'error');
         } finally {
@@ -203,21 +201,21 @@ export default function ClientListAntd() {
     // Save: handle both add and edit
     const save = async (id: number) => {
         try {
-            const row = (await form.validateFields()) as UpdateClientRequest;
+            const row = (await form.validateFields()) as CreateT;
             setLoading(true);
             setFieldErrors({});
             if (id < 0) {
                 // Add
-                await clientService.createClient(row);
+                await config.service.create(row);
                 setEditingKey(null);
-                fetchClients({ sortField, sortDirection, filters });
-                push('Client added', 'success');
+                fetchEntities({ sortField, sortDirection, filters });
+                push(`${config.name} added`, 'success');
             } else {
                 // Edit
-                await clientService.updateClient(id, row);
+                await config.service.update(id, row as unknown as UpdateT);
                 setEditingKey(null);
-                fetchClients({ sortField, sortDirection, filters });
-                push('Client updated', 'success');
+                fetchEntities({ sortField, sortDirection, filters });
+                push(`${config.name} updated`, 'success');
             }
         } catch (_error) {
             if (_error instanceof EstopiaError && _error.fieldErrors) {
@@ -249,20 +247,20 @@ export default function ClientListAntd() {
         }
     };
 
-    const columns: ColumnsType<Client> = [
-        ...CLIENT_COLUMNS.map((columnConfig) => ({
+    const columns: ColumnsType<T> = [
+        ...config.columns.map((columnConfig) => ({
             title: columnConfig.title,
-            dataIndex: columnConfig.key,
-            key: columnConfig.key,
+            dataIndex: columnConfig.key as string,
+            key: columnConfig.key as string,
             sorter: columnConfig.sortable,
             width: columnConfig.width,
             ...(columnConfig.searchable ? getColumnSearchProps(columnConfig.key, columnConfig.title) : {}),
-            render: (_: unknown, record: Client) => {
+            render: (_: unknown, record: T) => {
                 const editing = isEditing(record);
-                const error = fieldErrors[record.id]?.[columnConfig.key];
+                const error = fieldErrors[record.id]?.[columnConfig.key as string];
                 return editing ? (
                     <Form.Item
-                        name={columnConfig.key}
+                        name={columnConfig.key as string}
                         style={createFormItemStyle()}
                         validateStatus={error ? 'error' : ''}
                     >
@@ -284,7 +282,7 @@ export default function ClientListAntd() {
                         />
                     </Form.Item>
                 ) : (
-                    record[columnConfig.key]
+                    String(record[columnConfig.key] || '')
                 );
             },
         })),
@@ -315,7 +313,7 @@ export default function ClientListAntd() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}
-                        title="Add new client"
+                        title={`Add new ${config.name.toLowerCase()}`}
                     />
                 </div>
             ),
@@ -335,7 +333,7 @@ export default function ClientListAntd() {
                     textAlign: 'center' as const
                 }
             }),
-            render: (_: unknown, record: Client) => {
+            render: (_: unknown, record: T) => {
                 const editing = isEditing(record);
                 
                 if (editing) {
@@ -382,7 +380,7 @@ export default function ClientListAntd() {
                                             onClick={() => {
                                                 if (record.id < 0) {
                                                     // Remove temp add row
-                                                    setClients(clients.filter(c => c.id !== record.id));
+                                                    setEntities(entities.filter(e => e.id !== record.id));
                                                 }
                                                 cancel();
                                             }}
@@ -412,10 +410,10 @@ export default function ClientListAntd() {
     return (
         <Form form={form} component={false}>
             <Space direction="vertical" size="large" style={createLayoutStyle()}>
-                <Title level={3}>Clients</Title>
-                <Spin spinning={loading} tip="Loading clients...">
+                <Title level={3}>{config.pluralName}</Title>
+                <Spin spinning={loading} tip={`Loading ${config.pluralName.toLowerCase()}...`}>
                     <Table
-                        dataSource={clients}
+                        dataSource={entities}
                         columns={columns}
                         rowKey="id"
                         pagination={{ pageSize: tableConfig.pageSize }}
@@ -431,4 +429,4 @@ export default function ClientListAntd() {
             </Space>
         </Form>
     );
-} 
+}

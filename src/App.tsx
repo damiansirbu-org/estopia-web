@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ConfigProvider } from 'antd';
 import AssetList from './components/AssetList';
-import ClientListAntd from './components/ClientListAntd';
+import ClientList from './components/ClientList';
 import TerminalPanel from './components/common/TerminalPanel';
 import ContractList from './components/ContractList';
 import Header from './components/Header';
@@ -24,7 +24,7 @@ function AppContent() {
       case 'assets':
         return <AssetList />;
       case 'clients':
-        return <ClientListAntd />;
+        return <ClientList />;
       case 'contracts':
         return <ContractList />;
       case 'payments':

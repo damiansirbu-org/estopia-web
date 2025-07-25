@@ -12,7 +12,10 @@
       "Bash(npm run build:*)",
       "Bash(bash:*)",
       "Bash(./estopia-web.sh build:*)",
-      "Bash(get_path.bat)"
+      "Bash(get_path.bat)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": []
   }
