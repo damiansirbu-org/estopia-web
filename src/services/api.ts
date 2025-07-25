@@ -117,15 +117,45 @@ export const clientService = {
 
 // Asset API Service
 export const assetService = {
-  async getAllAssets(): Promise<Asset[]> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/assets`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
+  async getAllAssets(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Asset[]> {
+    let response: ApiResponse<Asset[]>;
+    if (params && params.filters && Object.keys(params.filters).length > 0) {
+      // Use POST /api/assets/filter for filtering
+      const filterDTO = { filters: params.filters };
+      // Build query string for sort params
+      const query: string[] = [];
+      if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      response = await apiCall(() =>
+        fetch(`${API_BASE_URL}/assets/filter${queryString}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(filterDTO),
+        })
+      );
+    } else {
+      // No filters: use GET /api/assets with optional sort params
+      const query: string[] = [];
+      if (params?.sortField) {
+        query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      }
+      if (params?.sortDirection) {
+        query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      }
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      response = await apiCall(() =>
+        fetch(`${API_BASE_URL}/assets${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+    }
+    return response.data;
   },
 
   async createAsset(asset: CreateAssetRequest): Promise<Asset> {
