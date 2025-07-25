@@ -1,21 +1,6 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
-
-export type TerminalMessageType = 'error' | 'success' | 'info';
-export interface TerminalMessage {
-    id: number;
-    text: string;
-    type: TerminalMessageType;
-    timestamp: number;
-}
-
-interface TerminalContextValue {
-    messages: TerminalMessage[];
-    push: (text: string, type?: TerminalMessageType) => void;
-    clear: () => void;
-    copy: () => void;
-}
-
-const TerminalContext = createContext<TerminalContextValue | undefined>(undefined);
+import React, { useCallback, useRef, useState } from 'react';
+import { TerminalContext } from './TerminalContextDefinition';
+import type { TerminalMessage, TerminalMessageType } from './TerminalTypes';
 
 export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [messages, setMessages] = useState<TerminalMessage[]>([]);
@@ -42,8 +27,4 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
 };
 
-export function useTerminal() {
-    const ctx = useContext(TerminalContext);
-    if (!ctx) throw new Error('useTerminal must be used within a TerminalProvider');
-    return ctx;
-} 
+ 

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./estopia-web.sh clean:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(/cygdrive/c/App/NodeJS/npm.cmd run type-check)",
+      "Bash(ls:*)",
+      "Bash(cmd.exe /c \"npm run type-check\")",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(bash:*)",
+      "Bash(./estopia-web.sh build:*)",
+      "Bash(get_path.bat)"
+    ],
+    "deny": []
+  }
+}

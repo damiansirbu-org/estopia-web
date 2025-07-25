@@ -1,88 +1,189 @@
-import type { GridDensity } from '@mui/x-data-grid';
-import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { useContext, useEffect, useState } from 'react';
-import { DataGridStyleContext } from '../theme/DataGridStyleContext';
+import { Button, Card, Divider, Radio, Space, Table, Typography } from 'antd';
+import type { RadioChangeEvent } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useState } from 'react';
+import { useTheme } from '../hooks/useTheme';
+import { designTokens } from '../theme/tokens';
 
-const stylePresets: { key: string; label: string; sx: object; density: GridDensity }[] = [
+const { Title, Paragraph } = Typography;
+
+interface PreviewData {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    status: string;
+}
+
+interface TableStylePreset {
+    key: string;
+    label: string;
+    size: 'small' | 'middle' | 'large';
+    bordered: boolean;
+    showHeader: boolean;
+}
+
+const tableStylePresets: TableStylePreset[] = [
     {
-        key: 'excel',
-        label: 'Excel',
-        sx: {
-            '& .MuiDataGrid-columnHeaders': { background: '#217346', color: '#fff', fontWeight: 'bold', fontFamily: 'monospace' },
-            '& .MuiDataGrid-cell': { borderRight: '1px solid #b7b7b7', fontFamily: 'monospace' },
-            '& .MuiDataGrid-row': { borderBottom: '1px solid #b7b7b7' },
-            border: '1px solid #217346', borderRadius: 2, fontSize: 15, background: '#fff',
-        },
-        density: 'compact',
+        key: 'compact',
+        label: 'Compact Table',
+        size: 'small',
+        bordered: true,
+        showHeader: true,
     },
     {
-        key: 'airtable',
-        label: 'Airtable/Retro',
-        sx: {
-            '& .MuiDataGrid-columnHeaders': { background: '#f5f5f5', color: '#222', fontWeight: 'bold', borderBottom: '2px solid #ccc', fontFamily: 'monospace' },
-            '& .MuiDataGrid-cell': { borderRight: '1px solid #ccc', fontFamily: 'monospace' },
-            '& .MuiDataGrid-row': { borderBottom: '1px solid #ccc' },
-            border: '1px solid #ccc', borderRadius: 8, fontSize: 15, background: '#faf9f6',
-        },
-        density: 'comfortable',
+        key: 'comfortable',
+        label: 'Comfortable Table',
+        size: 'middle',
+        bordered: true,
+        showHeader: true,
     },
     {
-        key: 'minimal',
-        label: 'Minimal',
-        sx: {
-            '& .MuiDataGrid-columnHeaders': { background: '#fff', color: '#222', fontWeight: 'bold', fontFamily: 'sans-serif' },
-            '& .MuiDataGrid-cell': { borderRight: 'none', fontFamily: 'sans-serif' },
-            '& .MuiDataGrid-row': { borderBottom: 'none' },
-            border: '1px solid #e0e0e0', borderRadius: 4, fontSize: 15, background: '#fff',
-        },
-        density: 'standard',
+        key: 'spacious',
+        label: 'Spacious Table',
+        size: 'large',
+        bordered: false,
+        showHeader: true,
     },
 ];
 
-const previewRows = [
-    { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
-    { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com' },
+const previewData: PreviewData[] = [
+    { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com', status: 'Active' },
+    { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', status: 'Active' },
+    { id: 3, firstName: 'Bob', lastName: 'Johnson', email: 'bob@example.com', status: 'Inactive' },
 ];
-const previewColumns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'firstName', headerName: 'First Name', width: 120 },
-    { field: 'lastName', headerName: 'Last Name', width: 120 },
-    { field: 'email', headerName: 'Email', width: 180 },
+
+const previewColumns: ColumnsType<PreviewData> = [
+    { title: 'ID', dataIndex: 'id', key: 'id', width: 70 },
+    { title: 'First Name', dataIndex: 'firstName', key: 'firstName', width: 120 },
+    { title: 'Last Name', dataIndex: 'lastName', key: 'lastName', width: 120 },
+    { title: 'Email', dataIndex: 'email', key: 'email', width: 180 },
+    { 
+        title: 'Status', 
+        dataIndex: 'status', 
+        key: 'status', 
+        width: 100,
+        render: (status: string) => (
+            <Button size="small" type={status === 'Active' ? 'primary' : 'default'}>
+                {status}
+            </Button>
+        )
+    },
 ];
 
 export default function Settings() {
-    const { styleKey, setStyleKey } = useContext(DataGridStyleContext) as { styleKey: string; setStyleKey: (key: string) => void };
-    const [selected, setSelected] = useState(styleKey || 'excel');
+    const { currentTheme, setCurrentTheme, themes } = useTheme();
+    const [selectedTableStyle, setSelectedTableStyle] = useState<string>(() => 
+        localStorage.getItem('table-style') || 'comfortable'
+    );
 
-    useEffect(() => {
-        setStyleKey(selected);
-        localStorage.setItem('datagrid-style', selected);
-    }, [selected, setStyleKey]);
+    const handleThemeChange = (e: RadioChangeEvent) => {
+        setCurrentTheme(e.target.value);
+    };
 
-    const preset = stylePresets.find(p => p.key === selected) || stylePresets[0];
+    const handleTableStyleChange = (e: RadioChangeEvent) => {
+        const newStyle = e.target.value;
+        setSelectedTableStyle(newStyle);
+        localStorage.setItem('table-style', newStyle);
+    };
+
+    const selectedTablePreset = tableStylePresets.find(p => p.key === selectedTableStyle) || tableStylePresets[1];
+
+    const containerStyle: React.CSSProperties = {
+        maxWidth: 800,
+        margin: '40px auto',
+        padding: designTokens.spacing.xl,
+    };
+
+    const sectionStyle: React.CSSProperties = {
+        marginBottom: designTokens.spacing.xxl,
+    };
+
+    const previewContainerStyle: React.CSSProperties = {
+        height: 350,
+        width: '100%',
+        marginTop: designTokens.spacing.lg,
+    };
 
     return (
-        <div style={{ maxWidth: 700, margin: '40px auto', padding: 24, background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
-            <h2>DataGrid Style Settings</h2>
-            <div style={{ display: 'flex', gap: 24, marginBottom: 24 }}>
-                {stylePresets.map(p => (
-                    <label key={p.key} style={{ cursor: 'pointer', padding: 8, border: selected === p.key ? '2px solid #1976d2' : '1px solid #ccc', borderRadius: 6, background: selected === p.key ? '#e3f2fd' : '#fafafa' }}>
-                        <input type="radio" name="datagrid-style" value={p.key} checked={selected === p.key} onChange={() => setSelected(p.key)} style={{ marginRight: 8 }} />
-                        {p.label}
-                    </label>
-                ))}
-            </div>
-            <div style={{ height: 260, width: '100%' }}>
-                <DataGrid
-                    rows={previewRows}
-                    columns={previewColumns}
-                    sx={preset.sx}
-                    density={preset.density}
-                    hideFooter
-                    disableColumnMenu
-                    disableRowSelectionOnClick
-                />
-            </div>
+        <div style={containerStyle}>
+            <Card>
+                <Title level={2}>Theme & Style Settings</Title>
+                <Paragraph>
+                    Customize the appearance of your application. Changes will be applied immediately 
+                    and saved for your next visit.
+                </Paragraph>
+
+                <div style={sectionStyle}>
+                    <Title level={3}>Application Theme</Title>
+                    <Paragraph type="secondary">
+                        Choose the overall color scheme and styling for the entire application.
+                    </Paragraph>
+                    
+                    <Radio.Group
+                        value={currentTheme}
+                        onChange={handleThemeChange}
+                        optionType="button"
+                        buttonStyle="solid"
+                        size="large"
+                    >
+                        <Space wrap size="middle">
+                            {themes.map(theme => (
+                                <Radio.Button key={theme.key} value={theme.key}>
+                                    {theme.label}
+                                </Radio.Button>
+                            ))}
+                        </Space>
+                    </Radio.Group>
+                </div>
+
+                <Divider />
+
+                <div style={sectionStyle}>
+                    <Title level={3}>Table Style</Title>
+                    <Paragraph type="secondary">
+                        Adjust the spacing and borders for all tables in the application.
+                    </Paragraph>
+                    
+                    <Radio.Group
+                        value={selectedTableStyle}
+                        onChange={handleTableStyleChange}
+                        optionType="button"
+                        buttonStyle="solid"
+                        size="large"
+                    >
+                        <Space wrap size="middle">
+                            {tableStylePresets.map(preset => (
+                                <Radio.Button key={preset.key} value={preset.key}>
+                                    {preset.label}
+                                </Radio.Button>
+                            ))}
+                        </Space>
+                    </Radio.Group>
+                </div>
+
+                <Divider />
+
+                <div>
+                    <Title level={3}>Preview</Title>
+                    <Paragraph type="secondary">
+                        See how your selected theme and table style will look.
+                    </Paragraph>
+                    
+                    <div style={previewContainerStyle}>
+                        <Table<PreviewData>
+                            dataSource={previewData}
+                            columns={previewColumns}
+                            rowKey="id"
+                            size={selectedTablePreset.size}
+                            bordered={selectedTablePreset.bordered}
+                            showHeader={selectedTablePreset.showHeader}
+                            pagination={{ pageSize: 5, showSizeChanger: false }}
+                            scroll={{ y: 250 }}
+                        />
+                    </div>
+                </div>
+            </Card>
         </div>
     );
 } 

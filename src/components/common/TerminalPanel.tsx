@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import type { TerminalMessage } from '../../context/TerminalContext';
+import type { TerminalMessage } from '../../context/TerminalTypes';
 
 interface TerminalPanelProps {
     messages: TerminalMessage[];

@@ -1,17 +1,18 @@
 import { useState } from 'react';
+import { ConfigProvider } from 'antd';
 import AssetList from './components/AssetList';
-import ClientList from './components/ClientList';
 import ClientListAntd from './components/ClientListAntd';
-import ClientListMUI from './components/ClientListMUI';
 import TerminalPanel from './components/common/TerminalPanel';
 import ContractList from './components/ContractList';
 import Header from './components/Header';
 import PaymentList from './components/PaymentList';
 import ErrorProvider from './context/ErrorProvider';
-import { TerminalProvider, useTerminal } from './context/TerminalContext';
+import { TerminalProvider } from './context/TerminalContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { useTheme } from './hooks/useTheme';
+import { useTerminal } from './context/useTerminal';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
-import { DataGridStyleProvider } from './theme/DataGridStyleProvider';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -23,10 +24,6 @@ function AppContent() {
       case 'assets':
         return <AssetList />;
       case 'clients':
-        return <ClientList />;
-      case 'clients-mui':
-        return <ClientListMUI />;
-      case 'clients-antd':
         return <ClientListAntd />;
       case 'contracts':
         return <ContractList />;
@@ -59,9 +56,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function App() {
+function ThemedApp() {
+  const { getThemeConfig } = useTheme();
+  
   return (
-    <DataGridStyleProvider>
+    <ConfigProvider theme={getThemeConfig()}>
       <ErrorProvider>
         <TerminalProvider>
           <AppShell>
@@ -69,7 +68,15 @@ function App() {
           </AppShell>
         </TerminalProvider>
       </ErrorProvider>
-    </DataGridStyleProvider>
+    </ConfigProvider>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <ThemedApp />
+    </ThemeProvider>
   );
 }
 

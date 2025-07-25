@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { designTokens } from '../../theme/tokens';
 
 export type FilterType = 'like' | 'notLike';
 
@@ -33,13 +34,69 @@ const ColumnFilterPopover: React.FC<ColumnFilterPopoverProps> = ({ value, type, 
         onClose();
     };
 
+    const containerStyle: React.CSSProperties = {
+        position: 'absolute',
+        zIndex: designTokens.zIndex.popover,
+        backgroundColor: designTokens.colors.background.primary,
+        border: `1px solid ${designTokens.colors.border.primary}`,
+        borderRadius: designTokens.borderRadius.base,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        padding: designTokens.spacing.md,
+        marginTop: designTokens.spacing.sm,
+        minWidth: 180,
+    };
+
+    const inputRowStyle: React.CSSProperties = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: designTokens.spacing.sm,
+        marginBottom: designTokens.spacing.sm,
+    };
+
+    const selectStyle: React.CSSProperties = {
+        padding: `${designTokens.spacing.xs}px ${designTokens.spacing.sm}px`,
+        border: `1px solid ${designTokens.colors.border.primary}`,
+        borderRadius: designTokens.borderRadius.base,
+        fontSize: designTokens.fontSize.sm,
+    };
+
+    const inputStyle: React.CSSProperties = {
+        ...selectStyle,
+        flex: 1,
+    };
+
+    const buttonRowStyle: React.CSSProperties = {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: designTokens.spacing.sm,
+    };
+
+    const buttonStyle: React.CSSProperties = {
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: designTokens.fontSize.xs,
+        fontWeight: designTokens.fontWeight.medium,
+        padding: 0,
+    };
+
+    const clearButtonStyle: React.CSSProperties = {
+        ...buttonStyle,
+        color: designTokens.colors.text.secondary,
+    };
+
+    const applyButtonStyle: React.CSSProperties = {
+        ...buttonStyle,
+        color: designTokens.colors.primary,
+    };
+
     return (
-        <div className="absolute z-50 bg-white border border-gray-200 rounded shadow-md p-3 mt-2 min-w-[180px]">
-            <div className="flex items-center gap-2 mb-2">
+        <div style={containerStyle}>
+            <div style={inputRowStyle}>
                 <select
                     value={localType}
                     onChange={e => setLocalType(e.target.value as FilterType)}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                    style={selectStyle}
                 >
                     {filterOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -49,20 +106,20 @@ const ColumnFilterPopover: React.FC<ColumnFilterPopoverProps> = ({ value, type, 
                     type="text"
                     value={localValue}
                     onChange={e => setLocalValue(e.target.value)}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm flex-1"
+                    style={inputStyle}
                     placeholder="Value"
                 />
             </div>
-            <div className="flex justify-end gap-2">
+            <div style={buttonRowStyle}>
                 <button
                     onClick={handleClear}
-                    className="text-gray-600 hover:text-gray-900 text-xs font-medium"
+                    style={clearButtonStyle}
                 >
                     Clear
                 </button>
                 <button
                     onClick={handleApply}
-                    className="text-blue-600 hover:text-blue-900 text-xs font-medium"
+                    style={applyButtonStyle}
                 >
                     Apply
                 </button>

@@ -1,48 +1,59 @@
-import { DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, MinusOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Space, Spin, Table, Typography } from 'antd';
 import type { ColumnsType, FilterDropdownProps, FilterValue, SorterResult, TableCurrentDataSource, TablePaginationConfig } from 'antd/es/table/interface';
 import { useEffect, useState } from 'react';
+import { CLIENT_COLUMNS } from '../constants/clientColumns';
 import type { FilterType } from '../components/common/ColumnFilterPopover';
-import { useTerminal } from '../context/TerminalContext';
+import { useTerminal } from '../context/useTerminal';
 import { clientService } from '../services/api';
+import { tableConfig } from '../theme/tokens';
+import {
+  createButtonGroupStyle,
+  createButtonStyle,
+  createFormItemStyle,
+  createIconStyle,
+  createLayoutStyle,
+  createSearchDropdownStyle,
+  createSearchInputStyle,
+} from '../theme/styleHelpers';
 import type { Client, UpdateClientRequest } from '../types/models';
 import { EstopiaError } from '../utils/ErrorHandler';
 
 const { Title } = Typography;
 
-function getColumnSearchProps(dataIndex: keyof Client) {
+function getColumnSearchProps(dataIndex: keyof Client, title: string) {
     return {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps) => (
-            <div style={{ padding: 8 }}>
+            <div style={createSearchDropdownStyle()}>
                 <Input
-                    placeholder={`Search ${String(dataIndex)}`}
+                    placeholder={`Search ${title}`}
                     value={selectedKeys[0]}
                     onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                     onPressEnter={() => confirm()}
-                    style={{ marginBottom: 8, display: 'block' }}
+                    style={createSearchInputStyle()}
                     autoFocus
                 />
                 <Space>
                     <Button
                         type="primary"
                         onClick={() => confirm()}
-                        icon={<SearchOutlined style={{ fontSize: 18 }} />}
+                        icon={<SearchOutlined style={createIconStyle()} />}
                         size="small"
-                        style={{ width: 90 }}
+                        style={createButtonGroupStyle()}
                     >
                         Search
                     </Button>
                     <Button
                         onClick={() => clearFilters && clearFilters()}
                         size="small"
-                        style={{ width: 90 }}
+                        style={createButtonGroupStyle()}
                     >
                         Reset
                     </Button>
                 </Space>
             </div>
         ),
-        filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined, fontSize: 18 }} />,
+        filterIcon: (_filtered: boolean) => <SearchOutlined style={createIconStyle()} />,
         onFilter: (value: string | number | boolean | bigint, record: Client) => {
             const cell = record[dataIndex];
             return cell ? String(cell).toLowerCase().includes(String(value).toLowerCase()) : false;
@@ -61,6 +72,9 @@ export default function ClientListAntd() {
     const [fieldErrors, setFieldErrors] = useState<Record<number, Record<string, string>>>({});
     const [form] = Form.useForm();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [tableStyle, setTableStyle] = useState(() => localStorage.getItem('table-style') || 'comfortable');
+    const [hasChanges, setHasChanges] = useState(false);
+    const [originalValues, setOriginalValues] = useState<Record<string, unknown>>({});
 
     const fetchClients = async (params?: { sortField?: string; sortDirection?: 'asc' | 'desc'; filters?: Record<string, { type: FilterType; value: string }> }) => {
         setLoading(true);
@@ -74,8 +88,16 @@ export default function ClientListAntd() {
 
     useEffect(() => {
         fetchClients({ sortField, sortDirection, filters });
-
     }, [sortField, sortDirection, filters]);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            setTableStyle(localStorage.getItem('table-style') || 'comfortable');
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
 
     const handleTableChange = (
         _pagination: TablePaginationConfig,
@@ -112,14 +134,19 @@ export default function ClientListAntd() {
     const isEditing = (record: Client) => record.id === editingKey;
 
     const edit = (record: Client) => {
-        form.setFieldsValue({ ...record });
+        const values = { ...record };
+        form.setFieldsValue(values);
         setEditingKey(record.id);
         setFieldErrors({});
+        setOriginalValues(values as Record<string, unknown>);
+        setHasChanges(false);
     };
 
     const cancel = () => {
         setEditingKey(null);
         setFieldErrors({});
+        setHasChanges(false);
+        setOriginalValues({});
     };
 
     // Add handler: insert a new editable row at the top
@@ -131,7 +158,7 @@ export default function ClientListAntd() {
             edit(existingAddRow);
             return;
         }
-        const newClient = {
+        const newClient: Client = {
             id: -Math.floor(Math.random() * 1e6), // temp negative id
             firstName: '',
             lastName: '',
@@ -144,6 +171,8 @@ export default function ClientListAntd() {
         form.setFieldsValue(newClient);
         setEditingKey(newClient.id);
         setFieldErrors({});
+        setOriginalValues({ ...newClient } as Record<string, unknown>);
+        setHasChanges(true); // New rows always have "changes" (they need to be saved)
     };
 
     // Delete handler: delete the currently edited client
@@ -208,31 +237,46 @@ export default function ClientListAntd() {
         }
     };
 
+    // Determine table props based on style setting
+    const getTableProps = () => {
+        switch (tableStyle) {
+            case 'compact':
+                return { size: 'small' as const, bordered: true };
+            case 'spacious':
+                return { size: 'large' as const, bordered: false };
+            default: // comfortable
+                return { size: 'middle' as const, bordered: true };
+        }
+    };
+
     const columns: ColumnsType<Client> = [
-        {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id',
-            sorter: true,
-            ...getColumnSearchProps('id'),
-            render: (_: unknown, record: Client) => record.id,
-        },
-        ...(['firstName', 'lastName', 'nationalId', 'email', 'phoneNumber', 'address'] as (keyof Client)[]).map((field) => ({
-            title: field.charAt(0).toUpperCase() + field.slice(1),
-            dataIndex: field,
-            key: field,
-            sorter: true,
-            ...getColumnSearchProps(field),
+        ...CLIENT_COLUMNS.map((columnConfig) => ({
+            title: columnConfig.title,
+            dataIndex: columnConfig.key,
+            key: columnConfig.key,
+            sorter: columnConfig.sortable,
+            width: columnConfig.width,
+            ...(columnConfig.searchable ? getColumnSearchProps(columnConfig.key, columnConfig.title) : {}),
             render: (_: unknown, record: Client) => {
                 const editing = isEditing(record);
-                const error = fieldErrors[record.id]?.[field];
+                const error = fieldErrors[record.id]?.[columnConfig.key];
                 return editing ? (
                     <Form.Item
-                        name={field}
-                        style={{ margin: 0 }}
+                        name={columnConfig.key}
+                        style={createFormItemStyle()}
                         validateStatus={error ? 'error' : ''}
                     >
                         <Input
+                            onChange={() => {
+                                // Check if current form values differ from original values
+                                setTimeout(() => {
+                                    const currentValues = form.getFieldsValue();
+                                    const changed = Object.keys(currentValues).some(key => 
+                                        currentValues[key] !== originalValues[key]
+                                    );
+                                    setHasChanges(changed || record.id < 0);
+                                }, 0);
+                            }}
                             onKeyDown={e => {
                                 if (e.key === 'Enter') save(record.id);
                                 if (e.key === 'Escape') cancel();
@@ -240,61 +284,143 @@ export default function ClientListAntd() {
                         />
                     </Form.Item>
                 ) : (
-                    record[field]
+                    record[columnConfig.key]
                 );
             },
         })),
+        // Actions column - last position (right side) with global actions in header
+        {
+            key: 'actions',
+            width: 40,
+            className: 'actions-column',
+            title: () => (
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    width: '100%',
+                    height: '100%'
+                }}>
+                    <Button 
+                        type="text"
+                        icon={<PlusOutlined />}
+                        size="small"
+                        onClick={handleAdd}
+                        style={{ 
+                            color: '#1890ff',
+                            padding: '4px',
+                            minWidth: '24px',
+                            height: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                        title="Add new client"
+                    />
+                </div>
+            ),
+            onHeaderCell: () => ({
+                style: { 
+                    backgroundColor: '#fafafa',
+                    borderLeft: '1px solid #f0f0f0',
+                    padding: '4px',
+                    textAlign: 'center' as const
+                }
+            }),
+            onCell: () => ({
+                style: { 
+                    backgroundColor: '#fafafa',
+                    borderLeft: '1px solid #f0f0f0',
+                    padding: '8px 4px',
+                    textAlign: 'center' as const
+                }
+            }),
+            render: (_: unknown, record: Client) => {
+                const editing = isEditing(record);
+                
+                if (editing) {
+                    if (showDeleteConfirm && record.id === editingKey) {
+                        // Delete confirmation
+                        return (
+                            <Space size={4}>
+                                <Button 
+                                    type="text"
+                                    icon={<CheckOutlined />}
+                                    size="small"
+                                    onClick={handleDelete}
+                                    style={{ color: '#52c41a', padding: '2px' }}
+                                />
+                                <Button 
+                                    type="text"
+                                    icon={<CloseOutlined />}
+                                    size="small"
+                                    onClick={() => {
+                                        setShowDeleteConfirm(false);
+                                        cancel();
+                                    }}
+                                    style={{ color: '#ff4d4f', padding: '2px' }}
+                                />
+                            </Space>
+                        );
+                    } else {
+                        // Smart button logic
+                        return (
+                            <Space size={4}>
+                                {hasChanges && (
+                                    <>
+                                        <Button 
+                                            type="text"
+                                            icon={<CheckOutlined />}
+                                            size="small"
+                                            onClick={() => save(record.id)}
+                                            style={{ color: '#52c41a', padding: '2px' }}
+                                        />
+                                        <Button 
+                                            type="text"
+                                            icon={<CloseOutlined />}
+                                            size="small"
+                                            onClick={() => {
+                                                if (record.id < 0) {
+                                                    // Remove temp add row
+                                                    setClients(clients.filter(c => c.id !== record.id));
+                                                }
+                                                cancel();
+                                            }}
+                                            style={{ color: '#ff4d4f', padding: '2px' }}
+                                        />
+                                    </>
+                                )}
+                                {!hasChanges && record.id > 0 && (
+                                    <Button 
+                                        type="text"
+                                        icon={<MinusOutlined />}
+                                        size="small"
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                        style={{ color: '#8c8c8c', padding: '2px' }}
+                                    />
+                                )}
+                            </Space>
+                        );
+                    }
+                }
+                
+                return null; // No actions when not editing
+            },
+        },
     ];
 
     return (
         <Form form={form} component={false}>
-            <Space direction="vertical" size="large" style={{ width: '100%', marginTop: 24 }}>
-                <Title level={3}>Clients (Ant Design)</Title>
-                <Space style={{ marginBottom: 12 }}>
-                    <Button
-                        type="default"
-                        icon={<PlusOutlined />}
-                        onClick={handleAdd}
-                        style={{
-                            background: '#fafafa',
-                            border: '1px solid #bdbdbd',
-                            color: '#333',
-                            fontWeight: 500,
-                        }}
-                    >
-                        Add
-                    </Button>
-                    {editingKey !== null && editingKey < 0 && (
-                        <>
-                            <Button type="primary" onClick={() => save(editingKey)} style={{ fontWeight: 500 }}>Yes</Button>
-                            <Button onClick={cancel} style={{ marginLeft: 4 }}>No</Button>
-                        </>
-                    )}
-                    {editingKey !== null && editingKey > 0 && !showDeleteConfirm && (
-                        <Button icon={<DeleteOutlined />} danger onClick={() => setShowDeleteConfirm(true)}>
-                            Delete
-                        </Button>
-                    )}
-                    {editingKey !== null && editingKey > 0 && showDeleteConfirm && (
-                        <>
-                            <Button danger onClick={handleDelete} style={{ fontWeight: 500 }}>Yes</Button>
-                            <Button onClick={() => setShowDeleteConfirm(false)} style={{ marginLeft: 4 }}>No</Button>
-                        </>
-                    )}
-                </Space>
+            <Space direction="vertical" size="large" style={createLayoutStyle()}>
+                <Title level={3}>Clients</Title>
                 <Spin spinning={loading} tip="Loading clients...">
                     <Table
                         dataSource={clients}
                         columns={columns}
                         rowKey="id"
-                        pagination={{ pageSize: 100 }}
-                        bordered
+                        pagination={{ pageSize: tableConfig.pageSize }}
+                        {...getTableProps()}
                         onChange={handleTableChange}
-                        components={{
-                            body: {
-                                cell: (props: React.TdHTMLAttributes<HTMLTableCellElement>) => <td {...props} />,
-                            },
-                        }}
                         onRow={record => ({
                             onClick: () => {
                                 if (editingKey === null) edit(record);
@@ -303,37 +429,6 @@ export default function ClientListAntd() {
                     />
                 </Spin>
             </Space>
-            <style>{`
-  .ant-pagination .ant-pagination-item-active {
-    background: #f5f5f5 !important;
-    border-color: #bdbdbd !important;
-  }
-  .ant-pagination .ant-pagination-item-active a {
-    color: #333 !important;
-  }
-  .ant-pagination .ant-pagination-item a {
-    color: #555;
-  }
-  .ant-pagination .ant-pagination-item:hover {
-    border-color: #888 !important;
-  }
-  .ant-pagination .ant-pagination-item-active {
-    font-weight: bold;
-  }
-  .ant-pagination .ant-pagination-next .ant-pagination-item-link,
-  .ant-pagination .ant-pagination-prev .ant-pagination-item-link {
-    color: #555 !important;
-    border-color: #bdbdbd !important;
-    background: #fafafa !important;
-  }
-  /* Make sort icons in table headers bigger */
-  .ant-table-column-sorter-up svg,
-  .ant-table-column-sorter-down svg {
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-  }
-`}</style>
         </Form>
     );
 } 
