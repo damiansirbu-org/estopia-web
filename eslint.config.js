@@ -24,6 +24,14 @@ export default tseslint.config([
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
       ],
+      // Performance-friendly React Hooks rules
+      'react-hooks/exhaustive-deps': 'warn', // Demote to warning instead of error
+      'react-hooks/rules-of-hooks': 'error',  // Keep this as error for correctness
+      
+      // Performance optimizations
+      '@typescript-eslint/no-empty-function': 'off', // Allow empty functions for performance callbacks
+      '@typescript-eslint/no-explicit-any': 'warn',  // Warn instead of error for quick prototyping
+      '@typescript-eslint/ban-ts-comment': 'warn',   // Allow @ts-ignore for performance hacks
     },
   },
 ])

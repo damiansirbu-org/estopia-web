@@ -1,7 +1,7 @@
 import { CheckOutlined, CloseOutlined, MinusOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Space, Spin, Table, Typography } from 'antd';
 import type { ColumnsType, FilterDropdownProps, FilterValue, SorterResult, TableCurrentDataSource, TablePaginationConfig } from 'antd/es/table/interface';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FilterType } from '../common/ColumnFilterPopover';
 import { useTerminal } from '../../context/useTerminal';
 import { tableConfig } from '../../theme/tokens';
@@ -67,7 +67,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
 }: EntityListProps<T, CreateT, UpdateT>) {
     const { push } = useTerminal();
     const [entities, setEntities] = useState<T[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Start with true since we fetch immediately
     const [sortField, setSortField] = useState<string | undefined>(undefined);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | undefined>(undefined);
     const [filters, setFilters] = useState<Record<string, { type: FilterType; value: string }> | undefined>(undefined);
@@ -79,19 +79,31 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
     const [hasChanges, setHasChanges] = useState(false);
     const [originalValues, setOriginalValues] = useState<Record<string, unknown>>({});
 
+    // Use ref to store the service to avoid recreating fetchEntities
+    const serviceRef = useRef(config.service);
+    serviceRef.current = config.service;
+
     const fetchEntities = useCallback(async (params?: { sortField?: string; sortDirection?: 'asc' | 'desc'; filters?: Record<string, { type: FilterType; value: string }> }) => {
         setLoading(true);
         try {
-            const data = await config.service.getAll(params || {});
+            const data = await serviceRef.current.getAll(params || {});
             setEntities(data);
         } finally {
             setLoading(false);
         }
-    }, [config.service]);
+    }, []); // No dependencies - function never changes
 
+    // Initial load only
     useEffect(() => {
-        fetchEntities({ sortField, sortDirection, filters });
-    }, [sortField, sortDirection, filters, fetchEntities]);
+        fetchEntities();
+    }, []);
+
+    // Re-fetch when sort/filter changes  
+    useEffect(() => {
+        if (sortField || sortDirection || filters) {
+            fetchEntities({ sortField, sortDirection, filters });
+        }
+    }, [sortField, sortDirection, filters]);
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -235,8 +247,8 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         }
     };
 
-    // Determine table props based on style setting
-    const getTableProps = () => {
+    // Determine table props based on style setting - memoized to prevent recalculation
+    const tableProps = useMemo(() => {
         switch (tableStyle) {
             case 'compact':
                 return { size: 'small' as const, bordered: true };
@@ -245,9 +257,9 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
             default: // comfortable
                 return { size: 'middle' as const, bordered: true };
         }
-    };
+    }, [tableStyle]);
 
-    const columns: ColumnsType<T> = [
+    const columns: ColumnsType<T> = useMemo(() => [
         ...config.columns.map((columnConfig) => ({
             title: columnConfig.title,
             dataIndex: columnConfig.key as string,
@@ -405,25 +417,34 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 return null; // No actions when not editing
             },
         },
-    ];
+    ], [config.columns, config.name, editingKey, fieldErrors, originalValues, hasChanges, showDeleteConfirm]);
+
+    // Memoize layout style to prevent recalculation
+    const layoutStyle = useMemo(() => createLayoutStyle(), []);
+
+    // Memoize onRow function to prevent recreation
+    const onRowHandler = useMemo(() => (record: T) => ({
+        onClick: () => {
+            if (editingKey === null) edit(record);
+        },
+    }), [editingKey]);
+
+    // Memoize pagination to prevent recreation
+    const paginationConfig = useMemo(() => ({ pageSize: tableConfig.pageSize }), []);
 
     return (
         <Form form={form} component={false}>
-            <Space direction="vertical" size="large" style={createLayoutStyle()}>
+            <Space direction="vertical" size="large" style={layoutStyle}>
                 <Title level={3}>{config.pluralName}</Title>
                 <Spin spinning={loading} tip={`Loading ${config.pluralName.toLowerCase()}...`}>
                     <Table
                         dataSource={entities}
                         columns={columns}
                         rowKey="id"
-                        pagination={{ pageSize: tableConfig.pageSize }}
-                        {...getTableProps()}
+                        pagination={paginationConfig}
+                        {...tableProps}
                         onChange={handleTableChange}
-                        onRow={record => ({
-                            onClick: () => {
-                                if (editingKey === null) edit(record);
-                            },
-                        })}
+                        onRow={onRowHandler}
                     />
                 </Spin>
             </Space>

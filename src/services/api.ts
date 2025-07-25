@@ -196,15 +196,46 @@ export const assetService = {
 
 // Contract API Service
 export const contractService = {
-  async getAllContracts(): Promise<Contract[]> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/contracts`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
+  async getAllContracts(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Contract[]> {
+    let response: ApiResponse<Contract[]>;
+    if (params && params.filters && Object.keys(params.filters).length > 0) {
+      // Use POST /api/contracts/filter for filtering
+      const filterDTO = { filters: params.filters };
+      // Build query string for sort params
+      const query: string[] = [];
+      if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      response = await apiCall(() =>
+        fetch(`${API_BASE_URL}/contracts/filter${queryString}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(filterDTO),
+        })
+      );
+    } else {
+      // No filters: use GET /api/contracts with optional sort params
+      const query: string[] = [];
+      if (params?.sortField) {
+        query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      }
+      if (params?.sortDirection) {
+        query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      }
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      response = await apiCall(() =>
+        fetch(`${API_BASE_URL}/contracts${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+    }
+    if (!response.success) throw new Error(response.message || 'API error');
+    return response.data || [];
   },
 
   async createContract(contract: CreateContractRequest): Promise<Contract> {
@@ -245,15 +276,46 @@ export const contractService = {
 
 // Payment API Service
 export const paymentService = {
-  async getAllPayments(): Promise<Payment[]> {
-    return apiCall(() =>
-      fetch(`${API_BASE_URL}/payments`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    );
+  async getAllPayments(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Payment[]> {
+    let response: ApiResponse<Payment[]>;
+    if (params && params.filters && Object.keys(params.filters).length > 0) {
+      // Use POST /api/payments/filter for filtering
+      const filterDTO = { filters: params.filters };
+      // Build query string for sort params
+      const query: string[] = [];
+      if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      response = await apiCall(() =>
+        fetch(`${API_BASE_URL}/payments/filter${queryString}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(filterDTO),
+        })
+      );
+    } else {
+      // No filters: use GET /api/payments with optional sort params
+      const query: string[] = [];
+      if (params?.sortField) {
+        query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+      }
+      if (params?.sortDirection) {
+        query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+      }
+      const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+      response = await apiCall(() =>
+        fetch(`${API_BASE_URL}/payments${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+    }
+    if (!response.success) throw new Error(response.message || 'API error');
+    return response.data || [];
   },
 
   async createPayment(payment: CreatePaymentRequest): Promise<Payment> {
