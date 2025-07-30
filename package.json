@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start-web": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint . --max-warnings 10",
     "lint:strict": "eslint . --max-warnings 0",

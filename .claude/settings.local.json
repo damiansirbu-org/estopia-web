@@ -26,7 +26,8 @@
       "Bash(sed:*)",
       "Bash(pkill:*)",
       "Bash(echo:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }

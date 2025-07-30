@@ -280,7 +280,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 
                 // Use custom renderer if provided
                 if (columnConfig.customRenderer) {
-                    return columnConfig.customRenderer(record, editing);
+                    return columnConfig.customRenderer(record, editing, fieldErrors[record.id]);
                 }
                 
                 return editing ? (

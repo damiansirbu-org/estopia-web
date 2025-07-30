@@ -41,19 +41,27 @@ export default function ContractList() {
       if (column.key === 'clientName') {
         return {
           ...column,
-          customRenderer: (record: Contract, editing: boolean) => {
+          customRenderer: (record: Contract, editing: boolean, fieldErrors?: Record<string, string>) => {
             if (!editing) {
               return record.clientName || `Client ID: ${record.clientId}`;
             }
             
             return (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <Form.Item name="clientName" style={{ margin: 0, flex: 1 }}>
+                <Form.Item 
+                  name="clientName" 
+                  style={{ margin: 0, flex: 1 }}
+                  validateStatus={fieldErrors?.clientId ? 'error' : ''}
+                  help={fieldErrors?.clientId}
+                >
                   <Input
                     placeholder="Select client..."
                     readOnly
                     style={{ cursor: 'pointer' }}
                   />
+                </Form.Item>
+                <Form.Item name="clientId" hidden>
+                  <Input />
                 </Form.Item>
                 <Button
                   size="small"
@@ -72,19 +80,27 @@ export default function ContractList() {
       if (column.key === 'assetName') {
         return {
           ...column,
-          customRenderer: (record: Contract, editing: boolean) => {
+          customRenderer: (record: Contract, editing: boolean, fieldErrors?: Record<string, string>) => {
             if (!editing) {
               return record.assetName || `Asset ID: ${record.assetId}`;
             }
             
             return (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <Form.Item name="assetName" style={{ margin: 0, flex: 1 }}>
+                <Form.Item 
+                  name="assetName" 
+                  style={{ margin: 0, flex: 1 }}
+                  validateStatus={fieldErrors?.assetId ? 'error' : ''}
+                  help={fieldErrors?.assetId}
+                >
                   <Input
                     placeholder="Select asset..."
                     readOnly
                     style={{ cursor: 'pointer' }}
                   />
+                </Form.Item>
+                <Form.Item name="assetId" hidden>
+                  <Input />
                 </Form.Item>
                 <Button
                   size="small"
@@ -103,7 +119,7 @@ export default function ContractList() {
       if (column.key === 'startDate' || column.key === 'endDate') {
         return {
           ...column,
-          customRenderer: (record: Contract, editing: boolean) => {
+          customRenderer: (record: Contract, editing: boolean, fieldErrors?: Record<string, string>) => {
             if (!editing) {
               return record[column.key] || '';
             }

@@ -16,7 +16,7 @@ export interface EntityColumnConfig<T extends BaseEntity> {
   sortable: boolean;
   width?: number;
   required?: boolean;
-  customRenderer?: (record: T, editing: boolean) => React.ReactNode;
+  customRenderer?: (record: T, editing: boolean, fieldErrors?: Record<string, string>) => React.ReactNode;
 }
 
 // Service interface that all entity services must implement
