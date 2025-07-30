@@ -34,6 +34,8 @@ export interface Contract {
   id: number;
   clientId: number;
   assetId: number;
+  clientName?: string; // For display purposes
+  assetName?: string;  // For display purposes
   startDate: string; // LocalDate in backend
   endDate: string;   // LocalDate in backend
   rentAmount: number;
@@ -48,6 +50,7 @@ export interface Contract {
 export interface Payment {
   id: number;
   contractId: number;
+  contractInfo?: string; // For display purposes (e.g., "Client Name - Asset Name")
   dueDate: string; // LocalDate in backend
   rentAmount: number;
   amountMaintenance?: number;

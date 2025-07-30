@@ -4,7 +4,7 @@ import type { EntityColumnConfig } from '../types/entity/entityConfig';
 export type PaymentColumnConfig = EntityColumnConfig<Payment>;
 
 export const PAYMENT_COLUMNS: readonly PaymentColumnConfig[] = [
-  { key: 'contractId', title: 'Contract ID', searchable: true, sortable: true, width: 120 },
+  { key: 'contractInfo', title: 'Contract', searchable: true, sortable: true, width: 150 },
   { key: 'dueDate', title: 'Due Date', searchable: true, sortable: true, width: 120 },
   { key: 'rentAmount', title: 'Rent Amount', searchable: true, sortable: true, width: 120 },
   { key: 'amountMaintenance', title: 'Maintenance', searchable: true, sortable: true, width: 120 },

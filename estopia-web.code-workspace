@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../estopia-backend"
+		}
+	],
+	"settings": {
+		"typescript.preferences.includePackageJsonAutoImports": "auto",
+		"files.associations": {
+			"*.tsx": "typescriptreact",
+			"*.ts": "typescript"
+		},
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}

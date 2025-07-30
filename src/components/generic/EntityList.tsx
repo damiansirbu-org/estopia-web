@@ -20,6 +20,7 @@ const { Title } = Typography;
 
 interface EntityListProps<T extends BaseEntity, CreateT, UpdateT> {
   config: EntityConfig<T, CreateT, UpdateT>;
+  formRef?: React.MutableRefObject<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 function getColumnSearchProps<T extends BaseEntity>(dataIndex: keyof T, title: string) {
@@ -63,7 +64,8 @@ function getColumnSearchProps<T extends BaseEntity>(dataIndex: keyof T, title: s
 }
 
 export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({ 
-  config 
+  config,
+  formRef
 }: EntityListProps<T, CreateT, UpdateT>) {
     const { push } = useTerminal();
     const [entities, setEntities] = useState<T[]>([]);
@@ -81,6 +83,11 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
 
     // Use ref to store the service to avoid recreating fetchEntities
     const serviceRef = useRef(config.service);
+    
+    // Connect external form ref if provided
+    if (formRef) {
+        formRef.current = form;
+    }
     serviceRef.current = config.service;
 
     const fetchEntities = useCallback(async (params?: { sortField?: string; sortDirection?: 'asc' | 'desc'; filters?: Record<string, { type: FilterType; value: string }> }) => {
@@ -270,6 +277,12 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
             render: (_: unknown, record: T) => {
                 const editing = isEditing(record);
                 const error = fieldErrors[record.id]?.[columnConfig.key as string];
+                
+                // Use custom renderer if provided
+                if (columnConfig.customRenderer) {
+                    return columnConfig.customRenderer(record, editing);
+                }
+                
                 return editing ? (
                     <Form.Item
                         name={columnConfig.key as string}

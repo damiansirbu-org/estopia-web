@@ -8,6 +8,8 @@ const createEmptyContract = (): Contract => ({
   id: 0, // This will be overridden with negative ID in EntityList
   clientId: 0,
   assetId: 0,
+  clientName: '',
+  assetName: '',
   startDate: '',
   endDate: '',
   rentAmount: 0,

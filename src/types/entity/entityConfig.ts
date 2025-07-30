@@ -1,4 +1,5 @@
 import type { FilterType } from '../../components/common/ColumnFilterPopover';
+import type React from 'react';
 
 // Base entity interface - all entities must extend this
 export interface BaseEntity {
@@ -15,6 +16,7 @@ export interface EntityColumnConfig<T extends BaseEntity> {
   sortable: boolean;
   width?: number;
   required?: boolean;
+  customRenderer?: (record: T, editing: boolean) => React.ReactNode;
 }
 
 // Service interface that all entity services must implement

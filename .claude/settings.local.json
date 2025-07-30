@@ -15,7 +15,18 @@
       "Bash(get_path.bat)",
       "Bash(mv:*)",
       "Bash(mkdir:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm install:*)",
+      "mcp__mcp-storage__search_items",
+      "mcp__mcp-storage__list_items",
+      "mcp__mcp-storage__retrieve_item",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(cp:*)",
+      "Bash(sed:*)",
+      "Bash(pkill:*)",
+      "Bash(echo:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

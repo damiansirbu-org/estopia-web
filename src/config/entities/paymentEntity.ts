@@ -7,6 +7,7 @@ import type { EntityConfig, EntityService } from '../../types/entity/entityConfi
 const createEmptyPayment = (): Payment => ({
   id: 0, // This will be overridden with negative ID in EntityList
   contractId: 0,
+  contractInfo: '',
   dueDate: '',
   rentAmount: 0,
   amountMaintenance: undefined,

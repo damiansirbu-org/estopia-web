@@ -4,8 +4,8 @@ import type { EntityColumnConfig } from '../types/entity/entityConfig';
 export type ContractColumnConfig = EntityColumnConfig<Contract>;
 
 export const CONTRACT_COLUMNS: readonly ContractColumnConfig[] = [
-  { key: 'clientId', title: 'Client ID', searchable: true, sortable: true, width: 100 },
-  { key: 'assetId', title: 'Asset ID', searchable: true, sortable: true, width: 100 },
+  { key: 'clientName', title: 'Client', searchable: true, sortable: true, width: 150 },
+  { key: 'assetName', title: 'Asset', searchable: true, sortable: true, width: 150 },
   { key: 'startDate', title: 'Start Date', searchable: true, sortable: true, width: 120 },
   { key: 'endDate', title: 'End Date', searchable: true, sortable: true, width: 120 },
   { key: 'rentAmount', title: 'Rent Amount', searchable: true, sortable: true, width: 120 },
