@@ -103,14 +103,14 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
     // Initial load only
     useEffect(() => {
         fetchEntities();
-    }, []);
+    }, [fetchEntities]);
 
     // Re-fetch when sort/filter changes  
     useEffect(() => {
         if (sortField || sortDirection || filters) {
             fetchEntities({ sortField, sortDirection, filters });
         }
-    }, [sortField, sortDirection, filters]);
+    }, [sortField, sortDirection, filters, fetchEntities]);
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -153,16 +153,16 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         setFilters(Object.keys(newFilters).length > 0 ? newFilters : undefined);
     };
 
-    const isEditing = (record: T) => record.id === editingKey;
+    const isEditing = useCallback((record: T) => record.id === editingKey, [editingKey]);
 
-    const edit = (record: T) => {
+    const edit = useCallback((record: T) => {
         const values = { ...record };
         form.setFieldsValue(values);
         setEditingKey(record.id);
         setFieldErrors({});
         setOriginalValues(values as Record<string, unknown>);
         setHasChanges(false);
-    };
+    }, [form]);
 
     const cancel = () => {
         setEditingKey(null);
@@ -172,7 +172,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
     };
 
     // Add handler: insert a new editable row at the top
-    const handleAdd = () => {
+    const handleAdd = useCallback(() => {
         if (editingKey !== null) return; // Only one edit at a time
         // Prevent multiple negative-ID add rows
         const existingAddRow = entities.find(e => e.id < 0);
@@ -190,10 +190,10 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         setFieldErrors({});
         setOriginalValues({ ...newEntity } as Record<string, unknown>);
         setHasChanges(true); // New rows always have "changes" (they need to be saved)
-    };
+    }, [editingKey, entities, edit, config, form]);
 
     // Delete handler: delete the currently edited entity
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (editingKey === null) return;
         setLoading(true);
         setShowDeleteConfirm(false);
@@ -215,10 +215,10 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         } finally {
             setLoading(false);
         }
-    };
+    }, [editingKey, entities, config.service, config.name, fetchEntities, sortField, sortDirection, filters, push]);
 
     // Save: handle both add and edit
-    const save = async (id: number) => {
+    const save = useCallback(async (id: number) => {
         try {
             const row = (await form.validateFields()) as CreateT;
             setLoading(true);
@@ -252,7 +252,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         } finally {
             setLoading(false);
         }
-    };
+    }, [form, config.service, config.name, fetchEntities, sortField, sortDirection, filters, push]);
 
     // Determine table props based on style setting - memoized to prevent recalculation
     const tableProps = useMemo(() => {
@@ -430,7 +430,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 return null; // No actions when not editing
             },
         },
-    ], [config.columns, config.name, editingKey, fieldErrors, originalValues, hasChanges, showDeleteConfirm]);
+    ], [config.columns, config.name, editingKey, fieldErrors, originalValues, hasChanges, showDeleteConfirm, entities, form, handleAdd, handleDelete, save, isEditing]);
 
     // Memoize layout style to prevent recalculation
     const layoutStyle = useMemo(() => createLayoutStyle(), []);
@@ -440,7 +440,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         onClick: () => {
             if (editingKey === null) edit(record);
         },
-    }), [editingKey]);
+    }), [editingKey, edit]);
 
     // Memoize pagination to prevent recreation
     const paginationConfig = useMemo(() => ({ pageSize: tableConfig.pageSize }), []);

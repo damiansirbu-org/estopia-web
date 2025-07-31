@@ -10,18 +10,11 @@ export interface ClientColumnConfig {
 
 export const CLIENT_COLUMNS: readonly ClientColumnConfig[] = [
   {
-    key: 'firstName',
-    title: 'First Name',
+    key: 'name',
+    title: 'Name',
     searchable: true,
     sortable: true,
-    width: 120,
-  },
-  {
-    key: 'lastName', 
-    title: 'Last Name',
-    searchable: true,
-    sortable: true,
-    width: 120,
+    width: 200,
   },
   {
     key: 'nationalId',

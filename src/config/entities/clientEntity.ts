@@ -6,8 +6,7 @@ import type { EntityConfig, EntityService } from '../../types/entity/entityConfi
 // Create empty client for new records
 const createEmptyClient = (): Client => ({
   id: 0, // This will be overridden with negative ID in EntityList
-  firstName: '',
-  lastName: '',
+  name: '',
   nationalId: '',
   email: '',
   phoneNumber: '',

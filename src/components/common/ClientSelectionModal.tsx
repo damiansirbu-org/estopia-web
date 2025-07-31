@@ -40,8 +40,8 @@ export default function ClientSelectionModal({
   const columns: ColumnsType<Client> = [
     {
       title: 'Name',
+      dataIndex: 'name',
       key: 'name',
-      render: (_, record) => `${record.firstName} ${record.lastName}`,
       width: 200,
     },
     {

@@ -17,7 +17,7 @@ export default function ContractList() {
   const handleClientSelect = (client: Client) => {
     if (formRef.current) {
       formRef.current.setFieldsValue({
-        clientName: `${client.firstName} ${client.lastName}`,
+        clientName: client.name,
         clientId: client.id,
       });
     }
@@ -119,7 +119,7 @@ export default function ContractList() {
       if (column.key === 'startDate' || column.key === 'endDate') {
         return {
           ...column,
-          customRenderer: (record: Contract, editing: boolean, fieldErrors?: Record<string, string>) => {
+          customRenderer: (record: Contract, editing: boolean, _fieldErrors?: Record<string, string>) => {
             if (!editing) {
               return record[column.key] || '';
             }
@@ -128,23 +128,6 @@ export default function ContractList() {
               <Form.Item 
                 name={column.key} 
                 style={{ margin: 0 }}
-                rules={[
-                  { required: true, message: `${column.key === 'startDate' ? 'Start' : 'End'} date is required` },
-                  ...(column.key === 'endDate' ? [
-                    ({ getFieldValue }: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
-                      validator(_: any, value: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-                        const startDate = getFieldValue('startDate');
-                        if (!value || !startDate) {
-                          return Promise.resolve();
-                        }
-                        if (dayjs(value).isBefore(dayjs(startDate))) {
-                          return Promise.reject(new Error('End date must be after start date'));
-                        }
-                        return Promise.resolve();
-                      },
-                    }),
-                  ] : [])
-                ]}
                 getValueProps={(value) => ({
                   value: parseDate(value),
                 })}
