@@ -6,8 +6,8 @@ import type { EntityConfig, EntityService } from '../../types/entity/entityConfi
 // Create empty contract for new records
 const createEmptyContract = (): Contract => ({
   id: 0, // This will be overridden with negative ID in EntityList
-  clientId: 0,
-  assetId: 0,
+  clientId: null as unknown as number, // Will be set when client is selected
+  assetId: null as unknown as number,  // Will be set when asset is selected
   clientName: '',
   assetName: '',
   startDate: '',

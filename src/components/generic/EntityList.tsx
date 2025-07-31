@@ -241,9 +241,10 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 const fe: Record<string, string> = {};
                 for (const e of _error.fieldErrors) {
                     fe[e.field] = e.message;
+                    // Push each validation error message to terminal
+                    push(`${e.field}: ${e.message}`, 'error');
                 }
                 setFieldErrors({ [id]: fe });
-                push('Validation error', 'error');
             } else if (_error && (_error as { errorFields?: unknown }).errorFields) {
                 // AntD form validation error, do nothing
             } else {

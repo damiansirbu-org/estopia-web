@@ -53,7 +53,8 @@
       "Bash(C:/App/Usql/usql.exe \"postgres://estopia_user:estopia_pass@localhost:5432/estopia\" -c \"ALTER TABLE clients ALTER COLUMN national_id SET NOT NULL;\")",
       "Bash(C:/App/Usql/usql.exe \"postgres://estopia_user:estopia_pass@localhost:5432/estopia\" -c \"SELECT id, name, national_id FROM clients WHERE national_id IS NULL;\")",
       "Bash(C:/App/Usql/usql.exe:*)",
-      "Bash(timeout 30 mvn spring-boot:run:*)"
+      "Bash(timeout 30 mvn spring-boot:run:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

@@ -52,7 +52,6 @@ export default function ContractList() {
                   name="clientName" 
                   style={{ margin: 0, flex: 1 }}
                   validateStatus={fieldErrors?.clientId ? 'error' : ''}
-                  help={fieldErrors?.clientId}
                 >
                   <Input
                     placeholder="Select client..."
@@ -91,7 +90,6 @@ export default function ContractList() {
                   name="assetName" 
                   style={{ margin: 0, flex: 1 }}
                   validateStatus={fieldErrors?.assetId ? 'error' : ''}
-                  help={fieldErrors?.assetId}
                 >
                   <Input
                     placeholder="Select asset..."
@@ -119,15 +117,18 @@ export default function ContractList() {
       if (column.key === 'startDate' || column.key === 'endDate') {
         return {
           ...column,
-          customRenderer: (record: Contract, editing: boolean, _fieldErrors?: Record<string, string>) => {
+          customRenderer: (record: Contract, editing: boolean, fieldErrors?: Record<string, string>) => {
             if (!editing) {
               return record[column.key] || '';
             }
+            
+            const error = fieldErrors?.[column.key as string];
             
             return (
               <Form.Item 
                 name={column.key} 
                 style={{ margin: 0 }}
+                validateStatus={error ? 'error' : ''}
                 getValueProps={(value) => ({
                   value: parseDate(value),
                 })}

@@ -13,15 +13,18 @@ export default function PaymentList() {
       if (column.key === 'dueDate' || column.key === 'paymentDate') {
         return {
           ...column,
-          customRenderer: (record: Payment, editing: boolean, _fieldErrors?: Record<string, string>) => {
+          customRenderer: (record: Payment, editing: boolean, fieldErrors?: Record<string, string>) => {
             if (!editing) {
               return record[column.key] || '';
             }
+            
+            const error = fieldErrors?.[column.key as string];
             
             return (
               <Form.Item 
                 name={column.key} 
                 style={{ margin: 0 }}
+                validateStatus={error ? 'error' : ''}
                 getValueProps={(value) => ({
                   value: parseDate(value),
                 })}
