@@ -279,9 +279,20 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 const editing = isEditing(record);
                 const error = fieldErrors[record.id]?.[columnConfig.key as string];
                 
+                // Change detection function to share with custom renderers
+                const triggerChangeDetection = () => {
+                    setTimeout(() => {
+                        const currentValues = form.getFieldsValue();
+                        const changed = Object.keys(currentValues).some(key => 
+                            currentValues[key] !== originalValues[key]
+                        );
+                        setHasChanges(changed || record.id < 0);
+                    }, 0);
+                };
+
                 // Use custom renderer if provided
                 if (columnConfig.customRenderer) {
-                    return columnConfig.customRenderer(record, editing, fieldErrors[record.id]);
+                    return columnConfig.customRenderer(record, editing, fieldErrors[record.id], triggerChangeDetection);
                 }
                 
                 return editing ? (
@@ -291,16 +302,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                         validateStatus={error ? 'error' : ''}
                     >
                         <Input
-                            onChange={() => {
-                                // Check if current form values differ from original values
-                                setTimeout(() => {
-                                    const currentValues = form.getFieldsValue();
-                                    const changed = Object.keys(currentValues).some(key => 
-                                        currentValues[key] !== originalValues[key]
-                                    );
-                                    setHasChanges(changed || record.id < 0);
-                                }, 0);
-                            }}
+                            onChange={triggerChangeDetection}
                             onKeyDown={e => {
                                 if (e.key === 'Enter') save(record.id);
                                 if (e.key === 'Escape') cancel();
@@ -315,7 +317,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         // Actions column - last position (right side) with global actions in header
         {
             key: 'actions',
-            width: 40,
+            width: 25, // 36 - 30% = 25.2, rounded to 25
             className: 'actions-column',
             title: () => (
                 <div style={{ 
@@ -348,15 +350,21 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                     backgroundColor: '#fafafa',
                     borderLeft: '1px solid #f0f0f0',
                     padding: '4px',
-                    textAlign: 'center' as const
+                    textAlign: 'center' as const,
+                    width: '25px',
+                    minWidth: '25px',
+                    maxWidth: '25px'
                 }
             }),
             onCell: () => ({
                 style: { 
                     backgroundColor: '#fafafa',
                     borderLeft: '1px solid #f0f0f0',
-                    padding: '8px 4px',
-                    textAlign: 'center' as const
+                    padding: '2px',
+                    textAlign: 'center' as const,
+                    width: '25px',
+                    minWidth: '25px',
+                    maxWidth: '25px'
                 }
             }),
             render: (_: unknown, record: T) => {
@@ -448,17 +456,22 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
 
     return (
         <Form form={form} component={false}>
-            <Space direction="vertical" size="large" style={layoutStyle}>
-                <Title level={3}>{config.pluralName}</Title>
+            <Space direction="vertical" size="middle" style={layoutStyle}>
                 <Spin spinning={loading} tip={`Loading ${config.pluralName.toLowerCase()}...`}>
                     <Table
                         dataSource={entities}
                         columns={columns}
                         rowKey="id"
-                        pagination={paginationConfig}
+                        pagination={{
+                            ...paginationConfig,
+                            hideOnSinglePage: false,
+                            showSizeChanger: false
+                        }}
                         {...tableProps}
                         onChange={handleTableChange}
                         onRow={onRowHandler}
+                        scroll={{ x: 'max-content' }}
+                        tableLayout="fixed"
                     />
                 </Spin>
             </Space>

@@ -37,12 +37,20 @@ function AppContent() {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main>
+      <main className="flex-1 overflow-hidden" style={{ 
+        margin: '0.5rem',
+        marginBottom: '23.5vh', // Space for console (22vh) + gap
+        backgroundColor: '#fff',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         {renderContent()}
       </main>
-    </>
+    </div>
   );
 }
 
@@ -60,15 +68,19 @@ function ThemedApp() {
   const { getThemeConfig } = useTheme();
   
   return (
-    <ConfigProvider theme={getThemeConfig()}>
-      <ErrorProvider>
-        <TerminalProvider>
-          <AppShell>
-            <AppContent />
-          </AppShell>
-        </TerminalProvider>
-      </ErrorProvider>
-    </ConfigProvider>
+    <div className="min-h-screen bg-gray-100 p-2">
+      <div className="max-w-full bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden relative" style={{ margin: '0 auto', height: 'calc(100vh - 1rem)' }}>
+        <ConfigProvider theme={getThemeConfig()}>
+          <ErrorProvider>
+            <TerminalProvider>
+              <AppShell>
+                <AppContent />
+              </AppShell>
+            </TerminalProvider>
+          </ErrorProvider>
+        </ConfigProvider>
+      </div>
+    </div>
   );
 }
 

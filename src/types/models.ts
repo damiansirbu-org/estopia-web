@@ -20,8 +20,8 @@ export interface Asset {
   roomCount?: number;
   bathroomCount?: number;
   floor?: string;
-  assetType?: string;
-  constructionYear?: number;
+  assetType?: 'APARTMENT' | 'HOUSE' | 'PARKING';
+  constructionYear?: string; // LocalDate in backend
   hasBalcony?: boolean;
   hasParking?: boolean;
   hasElevator?: boolean;
@@ -38,8 +38,8 @@ export interface Contract {
   startDate: string; // LocalDate in backend
   endDate: string;   // LocalDate in backend
   rentAmount: number;
-  amountMaintenance?: number;
   amountDeposit: number;
+  amountInvestment?: number;
   isActive?: boolean;
   notes?: string;
   createdAt?: string;
@@ -48,15 +48,16 @@ export interface Contract {
 
 export interface Payment {
   id: number;
-  contractId: number;
-  contractInfo?: string; // For display purposes (e.g., "Client Name - Asset Name")
+  assetId: number;
+  assetName?: string; // For display purposes
   dueDate: string; // LocalDate in backend
-  rentAmount: number;
+  amountRent: number;
   amountMaintenance?: number;
   amountNaturalGas?: number;
   amountElectricity?: number;
   amountWater?: number;
   amountOther?: number;
+  amountInvestment?: number;
   amountPaid?: number;
   isPaid?: boolean;
   paymentDate?: string; // LocalDate in backend

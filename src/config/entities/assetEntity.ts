@@ -13,7 +13,7 @@ const createEmptyAsset = (): Asset => ({
   roomCount: undefined,
   bathroomCount: undefined,
   floor: '',
-  assetType: '',
+  assetType: undefined,
   constructionYear: undefined,
   hasBalcony: false,
   hasParking: false,

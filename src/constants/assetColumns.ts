@@ -1,12 +1,7 @@
 import type { Asset } from '../types/models';
+import type { EntityColumnConfig } from '../types/entity/entityConfig';
 
-export interface AssetColumnConfig {
-  key: keyof Asset;
-  title: string;
-  searchable: boolean;
-  sortable: boolean;
-  width?: number;
-}
+export type AssetColumnConfig = EntityColumnConfig<Asset>;
 
 export const ASSET_COLUMNS: readonly AssetColumnConfig[] = [
   {
@@ -38,6 +33,13 @@ export const ASSET_COLUMNS: readonly AssetColumnConfig[] = [
     width: 80,
   },
   {
+    key: 'bathroomCount',
+    title: 'Bathrooms',
+    searchable: false,
+    sortable: true,
+    width: 90,
+  },
+  {
     key: 'surfaceArea',
     title: 'Surface (m²)',
     searchable: false,
@@ -57,6 +59,13 @@ export const ASSET_COLUMNS: readonly AssetColumnConfig[] = [
     searchable: false,
     sortable: true,
     width: 80,
+  },
+  {
+    key: 'description',
+    title: 'Description',
+    searchable: true,
+    sortable: false,
+    width: 200,
   },
 ] as const;
 

@@ -6,15 +6,16 @@ import type { EntityConfig, EntityService } from '../../types/entity/entityConfi
 // Create empty payment for new records
 const createEmptyPayment = (): Payment => ({
   id: 0, // This will be overridden with negative ID in EntityList
-  contractId: 0,
-  contractInfo: '',
+  assetId: null as unknown as number, // Will be set when asset is selected
+  assetName: '',
   dueDate: '',
-  rentAmount: 0,
+  amountRent: 0,
   amountMaintenance: undefined,
   amountNaturalGas: undefined,
   amountElectricity: undefined,
   amountWater: undefined,
   amountOther: undefined,
+  amountInvestment: undefined,
   amountPaid: undefined,
   isPaid: false,
   paymentDate: undefined,

@@ -86,6 +86,16 @@
 - **STD-LAYOUT-004**: Header navigation with consistent tab structure
 - **STD-LAYOUT-005**: Terminal panel always visible at bottom
 
+### Responsive Design Standards (ADR-RESP-001)
+- **STD-RESP-001**: **NO hardcoded pixel values allowed** - Use relative units (%, em, rem, vh, vw) or design tokens
+- **STD-RESP-002**: **Spacing must be proportional** - Use percentage-based margins/padding or design token multipliers
+- **STD-RESP-003**: **Design tokens preferred** - Use theme tokens that can scale proportionally across devices
+- **STD-RESP-004**: **Viewport-relative units** for container sizing (vh, vw, vmin, vmax)
+- **STD-RESP-005**: **Flexbox and Grid** for responsive layouts instead of fixed positioning
+- **STD-RESP-006**: **Media queries** when absolute breakpoints are necessary
+- **STD-RESP-007**: **Container queries** preferred over media queries when available
+- **STD-RESP-008**: **Minimum touch targets** of 44px (2.75rem) for mobile accessibility
+
 ### Visual Feedback Standards
 - **STD-VIS-001**: Loading states must be consistent (Spin component)
 - **STD-VIS-002**: Interactive elements must have hover and focus states
@@ -124,6 +134,14 @@
 - **STD-BUILD-003**: ESLint must pass with configured rules
 - **STD-BUILD-004**: Build output must be optimized for production
 - **STD-BUILD-005**: Environment variables properly configured for different environments
+- **STD-BUILD-006**: **MANDATORY**: After ANY code changes, run `./estopia-web.sh clean fix build` and fix all errors/warnings before proceeding
+
+### Framework Decision Standards (ADR-FRAMEWORK-001)
+- **STD-FRAMEWORK-001**: **MANDATORY**: ALWAYS consult official documentation (updated 2025) before implementing any framework features
+- **STD-FRAMEWORK-002**: **Multi-source verification required** - Use minimum 3 independent sources for technical decisions
+- **STD-FRAMEWORK-003**: **Official docs first** - Always check framework's official documentation before Stack Overflow or other sources
+- **STD-FRAMEWORK-004**: **Version compatibility** - Verify all solutions work with current framework versions in use
+- **STD-FRAMEWORK-005**: **Best practices enforcement** - Follow officially recommended patterns and avoid deprecated approaches
 
 ### Testing Standards (Future)
 - **STD-TEST-001**: Unit tests for complex utility functions

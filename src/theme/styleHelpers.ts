@@ -50,7 +50,7 @@ export const createIconStyle = (size: keyof typeof designTokens.fontSize = 'lg')
 
 export const createLayoutStyle = (): CSSProperties => ({
   width: '100%',
-  marginTop: designTokens.spacing.xl,
+  marginTop: designTokens.spacing.md, // Reduced from xl (24px) to md (12px) for more compact layout
 });
 
 export const createTableContainerStyle = (): CSSProperties => ({

@@ -13,8 +13,8 @@ const createEmptyContract = (): Contract => ({
   startDate: '',
   endDate: '',
   rentAmount: 0,
-  amountMaintenance: undefined,
   amountDeposit: 0,
+  amountInvestment: undefined,
   isActive: true,
   notes: '',
 });

@@ -25,76 +25,36 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({ messages, onClear, onCopy
 
     return (
         <div style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
+            position: 'absolute',
+            left: '0.5rem',
+            right: '0.5rem',
+            bottom: '0.5rem',
             background: '#fff',
             color: '#222',
             fontFamily: 'monospace',
             fontSize: 14,
             zIndex: 1000,
             borderTop: '2px solid #e0e0e0',
-            height: 180,
+            height: '22vh', // Rounded from 21.78vh
             display: 'flex',
             flexDirection: 'column',
             boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
+            borderRadius: '0 0 8px 8px', // Round bottom corners to match container
         }}>
-            {/* Top bar with separator and left-aligned buttons */}
+            {/* Simple spacing */}
             <div style={{
-                padding: '4px 12px',
-                borderBottom: '1px solid #e0e0e0',
-                display: 'flex',
-                justifyContent: 'flex-start',
-                alignItems: 'center',
-                background: '#fafafa',
-                minHeight: 32,
-            }}>
-                <button
-                    onClick={onCopy}
-                    title="Copy all messages"
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#555',
-                        cursor: 'pointer',
-                        fontSize: 14,
-                        marginRight: 8,
-                        padding: '2px 8px',
-                        borderRadius: 4,
-                        transition: 'background 0.2s',
-                    }}
-                    aria-label="Copy"
-                >
-                    Copy
-                </button>
-                <button
-                    onClick={onClear}
-                    title="Clear messages"
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#555',
-                        cursor: 'pointer',
-                        fontSize: 14,
-                        padding: '2px 8px',
-                        borderRadius: 4,
-                        transition: 'background 0.2s',
-                    }}
-                    aria-label="Clear"
-                >
-                    Clear
-                </button>
-            </div>
-            <div ref={panelRef} style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
+                height: '0.5rem', // Same as p-2 (8px)
+                background: '#fff',
+            }}></div>
+            <div ref={panelRef} style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
                 {messages.length === 0 ? (
-                    <div style={{ color: '#bbb', textAlign: 'center', marginTop: 32 }}>
+                    <div style={{ color: '#bbb', textAlign: 'center', marginTop: '2rem' }}>
                         No messages yet
                     </div>
                 ) : (
                     messages.slice(-maxMessages).map(msg => (
                         <div key={msg.id} style={{ color: msg.type === 'error' ? '#d32f2f' : msg.type === 'success' ? '#388e3c' : '#1976d2' }}>
-                            <span style={{ opacity: 0.6, marginRight: 8 }}>[{formatTime(msg.timestamp)}]</span>
+                            <span style={{ opacity: 0.6, marginRight: '0.5rem' }}>[{formatTime(msg.timestamp)}]</span>
                             {msg.text}
                         </div>
                     ))

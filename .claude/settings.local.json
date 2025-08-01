@@ -54,7 +54,22 @@
       "Bash(C:/App/Usql/usql.exe \"postgres://estopia_user:estopia_pass@localhost:5432/estopia\" -c \"SELECT id, name, national_id FROM clients WHERE national_id IS NULL;\")",
       "Bash(C:/App/Usql/usql.exe:*)",
       "Bash(timeout 30 mvn spring-boot:run:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(psql:*)",
+      "Bash(./estopia-backend.sh build-backend:*)",
+      "Bash(PGPASSWORD=estopia_pass psql -h localhost -U estopia_user -d estopia -c \"UPDATE assets SET construction_year = NULL; ALTER TABLE assets ALTER COLUMN construction_year TYPE DATE;\")",
+      "Bash(PGPASSWORD=estopia_pass psql:*)",
+      "Bash(timeout 15 java:*)",
+      "Bash(curl:*)",
+      "mcp__mcp-storage__get_tags",
+      "Bash(usql:*)",
+      "Bash(timeout 30 ./k6.exe run:*)",
+      "Bash(./k6.exe run --iterations=1 --vus=1 client-api-test-updated.js)",
+      "Bash(timeout 60 ./k6.exe run:*)",
+      "Bash(./estopia-backend.sh:*)",
+      "WebFetch(domain:ant.design)"
     ],
     "deny": []
   }

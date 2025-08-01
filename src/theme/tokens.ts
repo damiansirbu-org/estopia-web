@@ -21,12 +21,12 @@ export const designTokens = {
     },
   },
   spacing: {
-    xs: 4,
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 24,
-    xxl: 32,
+    xs: '0.25rem',  // 4px
+    sm: '0.5rem',   // 8px
+    md: '0.75rem',  // 12px
+    lg: '1rem',     // 16px
+    xl: '1.5rem',   // 24px
+    xxl: '2rem',    // 32px
   },
   fontSize: {
     xs: 12,
@@ -56,7 +56,7 @@ export const designTokens = {
 } as const;
 
 export const tableConfig = {
-  pageSize: 100,
+  pageSize: 20,
   rowHeight: 54,
 } as const;
 
