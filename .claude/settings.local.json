@@ -72,7 +72,22 @@
       "WebFetch(domain:ant.design)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:stackblitz.com)",
-      "WebFetch(domain:codesandbox.io)"
+      "WebFetch(domain:codesandbox.io)",
+      "Bash(C:/App/PORTX/bin-tools/rg \"onClick|onDoubleClick|onRow\" --type-add 'tsx:*.tsx' --type tsx -n C:WorkGitdamiansirbuestopia-websrc)",
+      "Bash(git init:*)",
+      "Bash(touch:*)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend status)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend add pom.xml scripts/)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend commit -m \"$(cat <<''EOF''\nRelease version 1.0.0 with uniform management scripts\n\nBackend changes:\n- Update pom.xml to version 1.0.0\n- Add uniform management scripts: clean, build, start, stop\n- Clean script removes Maven artifacts and logs\n- Build script compiles and packages JAR\n- Start script runs Spring Boot in development mode\n- Stop script gracefully terminates Java processes\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra status)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra add .)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend push origin main)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra remote add origin https://github.com/damiansirbu-org/estopia-infra.git)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra push -u origin main)",
+      "Bash(gh repo create:*)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra remote set-url origin git@github.com:damiansirbu-org/estopia-infra.git)",
+      "Bash(ssh:*)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend add estopia-backend.sh)"
     ],
     "deny": []
   }
