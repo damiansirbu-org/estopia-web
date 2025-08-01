@@ -1,6 +1,6 @@
 
 import { useState, useRef } from 'react';
-import { Button, Form, Input, DatePicker } from 'antd';
+import { Button, Form, Input, DatePicker, Checkbox, InputNumber } from 'antd';
 import EntityList from './generic/EntityList';
 import AssetSelectionModal from './common/AssetSelectionModal';
 import { paymentEntityConfig } from '../config/entities/paymentEntity';
@@ -118,6 +118,135 @@ export default function PaymentList() {
                   format={DATE_FORMAT}
                   placeholder={`Select ${column.key === 'dueDate' ? 'due' : 'payment'} date`}
                   onChange={triggerChangeDetection}
+                />
+              </Form.Item>
+            );
+          },
+        };
+      }
+
+      // amountTotal - readonly, calculated in backend
+      if (column.key === 'amountTotal') {
+        return {
+          ...column,
+          customRenderer: (record: Payment, _editing: boolean) => {
+            return (
+              <span style={{ fontWeight: 'bold' }}>
+                {record.amountTotal?.toFixed(2) || '0.00'}
+              </span>
+            );
+          },
+        };
+      }
+
+      // isPaid - checkbox with auto-fill logic
+      if (column.key === 'isPaid') {
+        return {
+          ...column,
+          customRenderer: (record: Payment, editing: boolean, fieldErrors?: Record<string, string>, triggerChangeDetection?: () => void) => {
+            if (!editing) {
+              return record.isPaid ? 'Yes' : 'No';
+            }
+            
+            return (
+              <Form.Item 
+                name="isPaid" 
+                style={{ margin: 0 }}
+                valuePropName="checked"
+                normalize={(value) => {
+                  // Ensure we always have a boolean value
+                  return Boolean(value);
+                }}
+              >
+                <Checkbox 
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    
+                    if (isChecked && record.amountTotal) {
+                      // Auto-fill paid amount with total amount
+                      if (formRef.current) {
+                        formRef.current.setFieldsValue({
+                          amountPaid: record.amountTotal
+                        });
+                      }
+                    }
+                    
+                    // Explicitly set the boolean value
+                    if (formRef.current) {
+                      formRef.current.setFieldsValue({
+                        isPaid: isChecked
+                      });
+                    }
+                    
+                    if (triggerChangeDetection) triggerChangeDetection();
+                  }}
+                />
+              </Form.Item>
+            );
+          },
+        };
+      }
+
+      // amountRemaining - readonly, calculated field (amountTotal - amountPaid)
+      if (column.key === 'amountRemaining') {
+        return {
+          ...column,
+          customRenderer: (record: Payment, _editing: boolean) => {
+            const totalAmount = record.amountTotal || 0;
+            const paidAmount = record.amountPaid || 0;
+            const remainingAmount = totalAmount - paidAmount;
+            
+            return (
+              <span style={{ 
+                color: remainingAmount > 0 ? 'red' : 'inherit',
+                fontWeight: remainingAmount > 0 ? 'bold' : 'normal'
+              }}>
+                {remainingAmount.toFixed(2)}
+              </span>
+            );
+          },
+        };
+      }
+
+      // amountPaid - number input with remaining calculation
+      if (column.key === 'amountPaid') {
+        return {
+          ...column,
+          customRenderer: (record: Payment, editing: boolean, fieldErrors?: Record<string, string>, triggerChangeDetection?: () => void) => {
+            if (!editing) {
+              return (record.amountPaid || 0).toFixed(2);
+            }
+            
+            const error = fieldErrors?.[column.key as string];
+            const totalAmount = record.amountTotal || 0;
+            
+            return (
+              <Form.Item 
+                name={column.key} 
+                style={{ margin: 0 }}
+                validateStatus={error ? 'error' : ''}
+              >
+                <InputNumber
+                  style={{ width: '100%' }}
+                  min={0}
+                  step={0.01}
+                  precision={2}
+                  placeholder={`Enter paid amount (Total: ${totalAmount.toFixed(2)})`}
+                  onChange={(value) => {
+                    // Update isPaid checkbox based on remaining amount
+                    setTimeout(() => {
+                      const currentValues = formRef.current?.getFieldsValue();
+                      if (currentValues) {
+                        const paidAmount = value || 0;
+                        const remainingAmount = totalAmount - paidAmount;
+                        
+                        formRef.current?.setFieldsValue({
+                          isPaid: remainingAmount <= 0
+                        });
+                      }
+                      if (triggerChangeDetection) triggerChangeDetection();
+                    }, 0);
+                  }}
                 />
               </Form.Item>
             );

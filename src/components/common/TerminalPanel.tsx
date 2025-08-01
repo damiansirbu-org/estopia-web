@@ -8,7 +8,7 @@ interface TerminalPanelProps {
     maxMessages?: number;
 }
 
-const TerminalPanel: React.FC<TerminalPanelProps> = ({ messages, onClear, onCopy, maxMessages = 100 }) => {
+const TerminalPanel: React.FC<TerminalPanelProps> = ({ messages, onClear: _onClear, onCopy: _onCopy, maxMessages = 100 }) => {
     const panelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

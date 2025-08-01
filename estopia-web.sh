@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Estopia Web Development Script with Quality Control
-# Usage: ./estopia-web.sh [clean|check|fix|build|watch|help]
+# Usage: ./estopia-web.sh [start|clean|check|fix|build|watch|help]
 
 echo "🏢 ESTOPIA WEB Development Script"
 echo "=================================="
@@ -25,7 +25,8 @@ show_help() {
     echo "====================="
     echo ""
     echo "🚀 DEVELOPMENT:"
-    echo "  ./estopia-web.sh           - Start normal development server"
+    echo "  ./estopia-web.sh           - Start normal development server (default)"
+    echo "  ./estopia-web.sh start     - Start normal development server" 
     echo "  ./estopia-web.sh clean     - Clear all caches and start fresh"
     echo ""
     echo "🛡️  QUALITY CONTROL:"
@@ -351,12 +352,12 @@ execute_commands() {
 
 # Main script logic
 if [ $# -eq 0 ]; then
-    # No arguments - show help by default
-    show_help
+    # No arguments - start development server
+    run_normal
 elif [ $# -eq 1 ]; then
     # Single argument - handle as before
     case "$1" in
-        "start-web")
+        "start")
             run_normal
             ;;
         "clean")

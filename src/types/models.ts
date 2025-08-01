@@ -58,7 +58,9 @@ export interface Payment {
   amountWater?: number;
   amountOther?: number;
   amountInvestment?: number;
+  amountTotal?: number; // Calculated in backend - sum of all amounts except amountPaid
   amountPaid?: number;
+  amountRemaining?: number; // UI-only calculated field: amountTotal - amountPaid
   isPaid?: boolean;
   paymentDate?: string; // LocalDate in backend
   notes?: string;

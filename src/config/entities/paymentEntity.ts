@@ -16,6 +16,7 @@ const createEmptyPayment = (): Payment => ({
   amountWater: undefined,
   amountOther: undefined,
   amountInvestment: undefined,
+  amountTotal: 0, // Will be calculated in backend
   amountPaid: undefined,
   isPaid: false,
   paymentDate: undefined,

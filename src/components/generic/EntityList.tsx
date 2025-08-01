@@ -16,7 +16,7 @@ import {
 import type { BaseEntity, EntityConfig } from '../../types/entity/entityConfig';
 import { EstopiaError } from '../../utils/ErrorHandler';
 
-const { Title } = Typography;
+const { Title: _Title } = Typography;
 
 interface EntityListProps<T extends BaseEntity, CreateT, UpdateT> {
   config: EntityConfig<T, CreateT, UpdateT>;
@@ -317,7 +317,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         // Actions column - last position (right side) with global actions in header
         {
             key: 'actions',
-            width: 25, // 36 - 30% = 25.2, rounded to 25
+            width: 29, // 25 + 15% = 28.75, rounded to 29
             className: 'actions-column',
             title: () => (
                 <div style={{ 
