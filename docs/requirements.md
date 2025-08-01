@@ -1,7 +1,217 @@
-# Estopia Web - Requirements Document
+# Estopia - Property Management Platform Requirements
 
-## Project Overview
-Estopia Web is a property management frontend application for handling real estate rental operations, providing comprehensive CRUD functionality for clients, assets, contracts, and payments.
+## 🎯 Project Overview
+
+Estopia is a comprehensive property management platform designed for **simplicity, efficiency, and scalability**. Built with modern technologies to streamline property management operations for landlords, property managers, and tenants.
+
+---
+
+## 🚀 Version 1.0.0 - Core Foundation
+
+### **Primary Goals**
+The main objective for version 1.0.0 is to establish a solid, production-ready foundation with essential property management capabilities.
+
+### **Core Features**
+
+#### **1. Complete CRUD Operations**
+- ✅ **Clients Management** - Full tenant/landlord profile management
+- ✅ **Assets Management** - Property details, specifications, and media
+- ✅ **Contracts Management** - Rental agreements and terms
+- ✅ **Payments Management** - Rent tracking with automatic calculations
+
+#### **2. Data Storage & Attachments (Data Lake)**
+- 📋 **File Upload System** - Document and media attachment support
+- 📋 **Document Management** - Contracts, invoices, property photos
+- 📋 **Storage Architecture** - Scalable data lake implementation
+- 📋 **File Security** - Access control and encryption
+- 📋 **Backup & Recovery** - Automated data protection
+
+#### **3. Basic Account Security**
+- 📋 **User Authentication** - Secure login/logout system
+- 📋 **Role-Based Access Control** - Admin, Manager, Tenant roles
+- 📋 **Session Management** - Secure session handling
+- 📋 **Password Security** - Hashing and validation
+- 📋 **Basic Authorization** - Resource access control
+
+#### **4. Production Deployment**
+- 📋 **Docker Containerization** - Full application containerization
+- 📋 **Docker Compose Setup** - Multi-service orchestration
+- 📋 **Server Deployment** - Production-ready deployment
+- 📋 **Database Setup** - PostgreSQL with proper configuration
+- 📋 **Environment Management** - Production/staging environments
+- 📋 **Health Monitoring** - Basic application health checks
+
+### **Technical Stack**
+- **Frontend**: React 18 + TypeScript + Vite + Ant Design
+- **Backend**: Spring Boot 3 + Java 21 + PostgreSQL
+- **Deployment**: Docker + Docker Compose
+- **Testing**: K6 API Testing + Jest/Vitest
+
+### **Success Criteria for v1.0.0**
+- ✅ All CRUD operations functional and tested
+- 📋 File attachment system operational
+- 📋 User authentication and basic security implemented
+- 📋 Application successfully deployed on server
+- 📋 Comprehensive API testing suite
+- 📋 Production-ready Docker setup
+
+---
+
+## 🏦 Version 2.0.0 - Banking Integration & Advanced Features
+
+### **Primary Goals**
+Transform Estopia into a comprehensive financial management platform with direct banking integration for seamless tenant payments.
+
+### **Banking Integration Features**
+
+#### **1. Romanian Banking APIs Integration**
+- 📋 **Raiffeisen Bank Romania** - Open Banking API integration
+- 📋 **ING Bank Romania** - PSD2 compliant payment services
+- 📋 **Alternative Payment Gateways** - Mobilpay, PayU, eMAG Pay
+- 📋 **Multi-bank Support** - Flexible payment provider architecture
+
+#### **2. Direct Tenant Payment System**
+- 📋 **One-Click Payments** - Direct bank transfer from app
+- 📋 **Payment Links** - SMS/Email payment notifications
+- 📋 **Recurring Payments** - Automatic monthly rent setup
+- 📋 **Real-time Status** - Payment confirmation and tracking
+- 📋 **Multi-currency Support** - RON primary, EUR secondary
+
+#### **3. Enhanced Payment Management**
+- 📋 **Automated Reconciliation** - Bank transaction matching
+- 📋 **Payment Analytics** - Tenant payment patterns and insights
+- 📋 **Late Payment Handling** - Automated reminders and penalties
+- 📋 **Receipt Generation** - Automatic invoice and receipt creation
+- 📋 **Payment History** - Comprehensive transaction records
+
+#### **4. Advanced Tenant Experience**
+- 📋 **Mobile Payment App** - Dedicated tenant mobile interface
+- 📋 **Payment Notifications** - Push notifications and alerts
+- 📋 **Payment Scheduling** - Future payment planning
+- 📋 **Payment Methods** - Card, bank transfer, mobile banking
+- 📋 **Multi-language Support** - Romanian and English interfaces
+
+### **Additional v2.0.0 Features**
+
+#### **5. Advanced Security & Compliance**
+- 📋 **PSD2 Compliance** - European payment directive compliance
+- 📋 **GDPR Implementation** - Full data protection compliance
+- 📋 **Bank-level Security** - Enhanced encryption and authentication
+- 📋 **Audit Trails** - Comprehensive logging and monitoring
+- 📋 **Fraud Prevention** - Transaction monitoring and alerts
+
+#### **6. Business Intelligence & Reporting**
+- 📋 **Financial Dashboards** - Revenue analytics and forecasting
+- 📋 **Tenant Analytics** - Payment behavior and risk assessment
+- 📋 **Property Performance** - ROI and profitability analysis
+- 📋 **Automated Reports** - Monthly/quarterly financial reports
+- 📋 **Export Capabilities** - Data export for accounting software
+
+#### **7. Integration Ecosystem**
+- 📋 **Accounting Software** - QuickBooks, Sage, local Romanian solutions
+- 📋 **Property Portals** - OLX, Storia, Imobiliare.ro integration
+- 📋 **Legal Compliance** - ANAF integration for tax reporting
+- 📋 **Communication Tools** - SMS/Email service integration
+- 📋 **Document Management** - Electronic signature integration
+
+### **Success Criteria for v2.0.0**
+- 📋 Live banking integration with at least 2 Romanian banks
+- 📋 Successful tenant payment processing with 99.9% uptime
+- 📋 PSD2 and GDPR compliance certification
+- 📋 Mobile app published on app stores
+- 📋 Integration with major Romanian accounting software
+- 📋 Advanced analytics and reporting suite operational
+
+---
+
+## 🔄 Development Phases
+
+### **Phase 1: Foundation (v1.0.0) - Q1 2025**
+1. **Complete CRUD Implementation** ✅
+2. **File Management System** 📋
+3. **Security Implementation** 📋
+4. **Production Deployment** 📋
+
+### **Phase 2: Research & Planning (Pre v2.0.0) - Q2 2025**
+1. **Banking API Research** 📋
+2. **Compliance Analysis** 📋
+3. **Architecture Design** 📋
+4. **Prototype Development** 📋
+
+### **Phase 3: Banking Integration (v2.0.0) - Q3-Q4 2025**
+1. **Core Banking Integration** 📋
+2. **Payment Flow Implementation** 📋
+3. **Mobile App Development** 📋
+4. **Advanced Features** 📋
+
+---
+
+## 📊 Current Status
+
+### **Completed Features** ✅
+- Complete CRUD system for all entities
+- Advanced table editing with visual feedback
+- Keyboard shortcuts and help system
+- Comprehensive API testing suite
+- Form validation with localized messages
+- Responsive UI with Ant Design
+- Payment calculations and tracking
+
+### **In Progress** 🔄
+- Code style review and optimization
+- UI/UX enhancements and fixes
+- Documentation updates
+
+### **Next Priorities** 📋
+1. File attachment system implementation
+2. User authentication and security
+3. Docker deployment setup
+4. Production environment configuration
+
+---
+
+## 🎯 Business Value
+
+### **Version 1.0.0 Benefits**
+- **Operational Efficiency** - Streamlined property management
+- **Data Organization** - Centralized tenant and property data
+- **Time Savings** - Automated calculations and tracking
+- **Professional Image** - Modern, web-based solution
+
+### **Version 2.0.0 Benefits**
+- **Improved Cash Flow** - Faster, automated payments
+- **Reduced Manual Work** - Automatic reconciliation
+- **Better Tenant Experience** - Convenient payment options
+- **Competitive Advantage** - Few property management apps offer banking integration
+- **Revenue Growth** - Transaction fee opportunities
+
+---
+
+## 🔧 Technical Considerations
+
+### **Scalability**
+- Microservices architecture preparation
+- Database optimization for multi-tenancy
+- CDN integration for file storage
+- Load balancing for high availability
+
+### **Security**
+- End-to-end encryption for financial data
+- Regular security audits and penetration testing
+- Compliance with Romanian banking regulations
+- GDPR data protection implementation
+
+### **Maintenance**
+- Automated testing and CI/CD pipelines
+- Monitoring and alerting systems
+- Regular dependency updates
+- Performance optimization
+
+---
+
+## 📋 Detailed Technical Requirements (Current Implementation)
+
+### **Core Entities Management**
 
 ## Business Requirements
 
