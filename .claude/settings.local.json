@@ -69,7 +69,10 @@
       "Bash(./k6.exe run --iterations=1 --vus=1 client-api-test-updated.js)",
       "Bash(timeout 60 ./k6.exe run:*)",
       "Bash(./estopia-backend.sh:*)",
-      "WebFetch(domain:ant.design)"
+      "WebFetch(domain:ant.design)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:stackblitz.com)",
+      "WebFetch(domain:codesandbox.io)"
     ],
     "deny": []
   }

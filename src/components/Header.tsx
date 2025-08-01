@@ -1,4 +1,6 @@
-import { Building2, DollarSign, FileText, Home, Settings, Users } from 'lucide-react';
+import { Building2, DollarSign, FileText, Home, Settings, Users, HelpCircle } from 'lucide-react';
+import { useState } from 'react';
+import HelpModal from './common/HelpModal';
 
 interface HeaderProps {
   activeTab: string;
@@ -6,6 +8,8 @@ interface HeaderProps {
 }
 
 function Header({ activeTab, setActiveTab }: HeaderProps) {
+  const [helpVisible, setHelpVisible] = useState(false);
+  
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'assets', label: 'Assets', icon: Building2 },
@@ -15,6 +19,7 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
   ];
 
   return (
+    <>
     <header className="bg-gray-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -47,6 +52,13 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
             <h1 className="text-2xl text-white tracking-widest" style={{ fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>ESTOPIA</h1>
             <button
               className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-md"
+              onClick={() => setHelpVisible(true)}
+              aria-label="Help"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </button>
+            <button
+              className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-md"
               onClick={() => setActiveTab('settings')}
               aria-label="Settings"
             >
@@ -56,6 +68,8 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
         </div>
       </div>
     </header>
+    <HelpModal visible={helpVisible} onClose={() => setHelpVisible(false)} />
+    </>
   );
 }
 

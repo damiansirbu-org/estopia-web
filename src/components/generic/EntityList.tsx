@@ -6,7 +6,9 @@ import type { FilterType } from '../common/ColumnFilterPopover';
 import { useTerminal } from '../../context/useTerminal';
 import { tableConfig } from '../../theme/tokens';
 import {
+  createActionButtonContainerStyle,
   createButtonGroupStyle,
+  createEditingRowStyle,
   createFormItemStyle,
   createIconStyle,
   createLayoutStyle,
@@ -267,6 +269,13 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         }
     }, [tableStyle]);
 
+    // Simple row click handler for editing
+    const handleRowClick = useCallback((record: T) => {
+        if (editingKey === null) {
+            edit(record);
+        }
+    }, [editingKey, edit]);
+
     const columns: ColumnsType<T> = useMemo(() => [
         ...config.columns.map((columnConfig) => ({
             title: columnConfig.title,
@@ -314,149 +323,168 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 );
             },
         })),
-        // Actions column - last position (right side) with global actions in header
-        {
-            key: 'actions',
-            width: 29, // 25 + 15% = 28.75, rounded to 29
-            className: 'actions-column',
-            title: () => (
-                <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    width: '100%',
-                    height: '100%'
-                }}>
-                    <Button 
-                        type="text"
-                        icon={<PlusOutlined />}
-                        size="small"
-                        onClick={handleAdd}
-                        style={{ 
-                            color: '#1890ff',
-                            padding: '4px',
-                            minWidth: '24px',
-                            height: '24px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}
-                        title={`Add new ${config.name.toLowerCase()}`}
-                    />
-                </div>
-            ),
-            onHeaderCell: () => ({
-                style: { 
-                    backgroundColor: '#fafafa',
-                    borderLeft: '1px solid #f0f0f0',
-                    padding: '4px',
-                    textAlign: 'center' as const,
-                    width: '25px',
-                    minWidth: '25px',
-                    maxWidth: '25px'
-                }
-            }),
-            onCell: () => ({
-                style: { 
-                    backgroundColor: '#fafafa',
-                    borderLeft: '1px solid #f0f0f0',
-                    padding: '2px',
-                    textAlign: 'center' as const,
-                    width: '25px',
-                    minWidth: '25px',
-                    maxWidth: '25px'
-                }
-            }),
-            render: (_: unknown, record: T) => {
-                const editing = isEditing(record);
-                
-                if (editing) {
-                    if (showDeleteConfirm && record.id === editingKey) {
-                        // Delete confirmation
-                        return (
-                            <Space size={4}>
-                                <Button 
-                                    type="text"
-                                    icon={<CheckOutlined />}
-                                    size="small"
-                                    onClick={handleDelete}
-                                    style={{ color: '#52c41a', padding: '2px' }}
-                                />
-                                <Button 
-                                    type="text"
-                                    icon={<CloseOutlined />}
-                                    size="small"
-                                    onClick={() => {
-                                        setShowDeleteConfirm(false);
-                                        cancel();
-                                    }}
-                                    style={{ color: '#ff4d4f', padding: '2px' }}
-                                />
-                            </Space>
-                        );
-                    } else {
-                        // Smart button logic
-                        return (
-                            <Space size={4}>
-                                {hasChanges && (
-                                    <>
-                                        <Button 
-                                            type="text"
-                                            icon={<CheckOutlined />}
-                                            size="small"
-                                            onClick={() => save(record.id)}
-                                            style={{ color: '#52c41a', padding: '2px' }}
-                                        />
-                                        <Button 
-                                            type="text"
-                                            icon={<CloseOutlined />}
-                                            size="small"
-                                            onClick={() => {
-                                                if (record.id < 0) {
-                                                    // Remove temp add row
-                                                    setEntities(entities.filter(e => e.id !== record.id));
-                                                }
-                                                cancel();
-                                            }}
-                                            style={{ color: '#ff4d4f', padding: '2px' }}
-                                        />
-                                    </>
-                                )}
-                                {!hasChanges && record.id > 0 && (
-                                    <Button 
-                                        type="text"
-                                        icon={<MinusOutlined />}
-                                        size="small"
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        style={{ color: '#8c8c8c', padding: '2px' }}
-                                    />
-                                )}
-                            </Space>
-                        );
-                    }
-                }
-                
-                return null; // No actions when not editing
-            },
-        },
-    ], [config.columns, config.name, editingKey, fieldErrors, originalValues, hasChanges, showDeleteConfirm, entities, form, handleAdd, handleDelete, save, isEditing]);
+    ], [config.columns, config.name, editingKey, fieldErrors, originalValues, form]);
 
     // Memoize layout style to prevent recalculation
     const layoutStyle = useMemo(() => createLayoutStyle(), []);
-
-    // Memoize onRow function to prevent recreation
-    const onRowHandler = useMemo(() => (record: T) => ({
-        onClick: () => {
-            if (editingKey === null) edit(record);
-        },
-    }), [editingKey, edit]);
+    const actionButtonContainerStyle = useMemo(() => createActionButtonContainerStyle(), []);
+    const editingRowStyle = useMemo(() => createEditingRowStyle(), []);
 
     // Memoize pagination to prevent recreation
     const paginationConfig = useMemo(() => ({ pageSize: tableConfig.pageSize }), []);
 
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Only process shortcuts when not typing in inputs
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+
+            const editingRecord = entities.find(entity => entity.id === editingKey);
+
+            switch (event.key) {
+                case '+':
+                    if (!editingRecord) {
+                        event.preventDefault();
+                        handleAdd();
+                    }
+                    break;
+                case '-':
+                    if (editingRecord && editingRecord.id > 0 && !hasChanges) {
+                        event.preventDefault();
+                        setShowDeleteConfirm(true);
+                    }
+                    break;
+                case 'Enter':
+                    if (editingRecord) {
+                        event.preventDefault();
+                        if (hasChanges) {
+                            save(editingRecord.id);
+                        } else if (showDeleteConfirm) {
+                            // Confirm delete when in delete confirmation state
+                            handleDelete();
+                        }
+                    }
+                    break;
+                case 'Escape':
+                    if (editingRecord) {
+                        event.preventDefault();
+                        if (showDeleteConfirm) {
+                            setShowDeleteConfirm(false);
+                        }
+                        if (editingRecord.id < 0) {
+                            // Remove temp add row
+                            setEntities(entities.filter(e => e.id !== editingRecord.id));
+                        }
+                        cancel();
+                    }
+                    break;
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [entities, editingKey, hasChanges, showDeleteConfirm, handleAdd, save, cancel, setEntities, setShowDeleteConfirm]);
+
+    // Get the currently editing record for action buttons
+    const editingRecord = entities.find(entity => entity.id === editingKey);
+
+    // Render action buttons based on current state
+    const renderActionButtons = () => {
+        if (!editingRecord) {
+            // No record being edited - show Add button (PLUS)
+            return (
+                <Button 
+                    icon={<PlusOutlined />}
+                    onClick={handleAdd}
+                    size="small"
+                    style={{ 
+                        backgroundColor: '#f0f9ff', 
+                        borderColor: '#bae6fd', 
+                        color: '#0369a1' 
+                    }}
+                />
+            );
+        }
+
+        const editing = isEditing(editingRecord);
+        if (editing) {
+            if (showDeleteConfirm && editingRecord.id === editingKey) {
+                // Delete confirmation (V and STOP SIGN)
+                return (
+                    <Space size="small">
+                        <Button 
+                            icon={<CheckOutlined />}
+                            onClick={handleDelete}
+                            size="small"
+                            style={{ 
+                                backgroundColor: '#fef7f7', 
+                                borderColor: '#fecdd3', 
+                                color: '#991b1b' 
+                            }}
+                        />
+                        <Button 
+                            icon={<CloseOutlined />}
+                            onClick={() => {
+                                setShowDeleteConfirm(false);
+                                cancel();
+                            }}
+                            size="small"
+                        />
+                    </Space>
+                );
+            } else {
+                // Smart button logic (V and STOP SIGN)
+                return (
+                    <Space size="small">
+                        {hasChanges && (
+                            <>
+                                <Button 
+                                    type="primary"
+                                    icon={<CheckOutlined />}
+                                    onClick={() => save(editingRecord.id)}
+                                    size="small"
+                                />
+                                <Button 
+                                    icon={<CloseOutlined />}
+                                    onClick={() => {
+                                        if (editingRecord.id < 0) {
+                                            // Remove temp add row
+                                            setEntities(entities.filter(e => e.id !== editingRecord.id));
+                                        }
+                                        cancel();
+                                    }}
+                                    size="small"
+                                />
+                            </>
+                        )}
+                        {!hasChanges && editingRecord.id > 0 && (
+                            <Button 
+                                icon={<MinusOutlined />}
+                                onClick={() => setShowDeleteConfirm(true)}
+                                size="small"
+                                style={{ 
+                                    backgroundColor: '#fef7f7', 
+                                    borderColor: '#fecdd3', 
+                                    color: '#991b1b' 
+                                }}
+                            />
+                        )}
+                    </Space>
+                );
+            }
+        }
+        
+        return null;
+    };
+
     return (
         <Form form={form} component={false}>
             <Space direction="vertical" size="middle" style={layoutStyle}>
+                <div style={actionButtonContainerStyle}>
+                    {renderActionButtons()}
+                </div>
                 <Spin spinning={loading} tip={`Loading ${config.pluralName.toLowerCase()}...`}>
                     <Table
                         dataSource={entities}
@@ -469,7 +497,13 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                         }}
                         {...tableProps}
                         onChange={handleTableChange}
-                        onRow={onRowHandler}
+                        onRow={(record: T) => ({
+                            onDoubleClick: () => handleRowClick(record),
+                            style: { 
+                                cursor: editingKey === null ? 'pointer' : 'default',
+                                ...(isEditing(record) ? editingRowStyle : {})
+                            }
+                        })}
                         scroll={{ x: 'max-content' }}
                         tableLayout="fixed"
                     />

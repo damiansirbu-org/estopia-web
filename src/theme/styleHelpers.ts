@@ -81,3 +81,12 @@ export const createConfirmButtonStyle = (): CSSProperties => ({
 export const createCancelButtonStyle = (): CSSProperties => ({
   marginLeft: designTokens.spacing.xs,
 });
+
+export const createActionButtonContainerStyle = (): CSSProperties => ({
+  marginLeft: designTokens.spacing.sm, // Move buttons a tad to the right (reduced from md to sm)
+  marginBottom: designTokens.spacing.sm, // Small spacing below buttons
+});
+
+export const createEditingRowStyle = (): CSSProperties => ({
+  backgroundColor: '#fefce8', // Light yellow shade for editing row - avoids conflict with red validation errors
+});
