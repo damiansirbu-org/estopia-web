@@ -21,17 +21,19 @@ show_help() {
     echo "  build                Build the frontend for production"
     echo "  start                Start the frontend development server"
     echo "  stop                 Stop the frontend development server"
+    echo "  dockerize            Build frontend Docker image (estopia-web:1.0.0)"
     echo "  help                 Show this help message"
     echo ""
     echo "Examples:"
     echo "  ./estopia-web.sh clean"
     echo "  ./estopia-web.sh build"
     echo "  ./estopia-web.sh start"
+    echo "  ./estopia-web.sh dockerize            # 🐳 Build Docker image"
     echo "  ./estopia-web.sh stop"
     echo ""
     echo "💡 Dependencies (Database, pgAdmin):"
-    echo "   Start: cd ../estopia-infra && ./scripts/start-dependencies.sh"
-    echo "   Stop:  cd ../estopia-infra && docker-compose -f docker-compose.dev.yml down"
+    echo "   Start: cd ../estopia-infra && ./estopia-infra.sh start-deps"
+    echo "   Stop:  cd ../estopia-infra && ./estopia-infra.sh stop"
 }
 
 case "$ACTION" in
@@ -160,6 +162,31 @@ case "$ACTION" in
                 echo "Use 'kill -9 $REMAINING' if needed."
             fi
         fi
+        ;;
+    dockerize)
+        echo "🐳 Building frontend Docker image..."
+        
+        # Check if Docker is running
+        if ! docker info > /dev/null 2>&1; then
+            echo "❌ Docker is not running. Please start Docker first."
+            exit 1
+        fi
+        
+        # Build production bundle first
+        echo "🔨 Building production bundle..."
+        npm run build
+        
+        # Build Docker image
+        echo "🐳 Building Docker image..."
+        docker build -t estopia-web:1.0.0 .
+        
+        echo "✅ Docker image built successfully: estopia-web:1.0.0"
+        echo ""
+        echo "🚀 To start the frontend:"
+        echo "   cd ../estopia-infra && ./estopia-infra.sh start frontend"
+        echo ""
+        echo "🏗️ To start full infrastructure:"
+        echo "   cd ../estopia-infra && ./estopia-infra.sh start"
         ;;
     help|-h|--help)
         show_help
