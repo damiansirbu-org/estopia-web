@@ -82,6 +82,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
     const [tableStyle, setTableStyle] = useState(() => localStorage.getItem('table-style') || 'comfortable');
     const [hasChanges, setHasChanges] = useState(false);
     const [originalValues, setOriginalValues] = useState<Record<string, unknown>>({});
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
     // Use ref to store the service to avoid recreating fetchEntities
     const serviceRef = useRef(config.service);
@@ -97,22 +98,31 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         try {
             const data = await serviceRef.current.getAll(params || {});
             setEntities(data);
+            setInitialLoadComplete(true);
+        } catch (error) {
+            console.error('Failed to fetch entities:', error);
+            push(`Failed to load ${config.pluralName.toLowerCase()}`, 'error');
         } finally {
             setLoading(false);
         }
     }, []); // No dependencies - function never changes
 
-    // Initial load only
+    // Initial load only - use ref to prevent double calls in StrictMode
+    const initializedRef = useRef(false);
     useEffect(() => {
-        fetchEntities();
-    }, [fetchEntities]);
+        if (!initializedRef.current) {
+            initializedRef.current = true;
+            fetchEntities();
+        }
+    }, []); // Empty dependency array - only run once
 
-    // Re-fetch when sort/filter changes  
+    // Re-fetch when sort/filter changes (but not on initial mount)
     useEffect(() => {
-        if (sortField || sortDirection || filters) {
+        // Only fetch if we have actual sort/filter values AND initial load is complete
+        if ((sortField || sortDirection || filters) && initialLoadComplete) {
             fetchEntities({ sortField, sortDirection, filters });
         }
-    }, [sortField, sortDirection, filters, fetchEntities]);
+    }, [sortField, sortDirection, filters, initialLoadComplete]); // Removed fetchEntities dependency
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -217,7 +227,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         } finally {
             setLoading(false);
         }
-    }, [editingKey, entities, config.service, config.name, fetchEntities, sortField, sortDirection, filters, push]);
+    }, [editingKey, entities, config.service, config.name, sortField, sortDirection, filters, push]);
 
     // Save: handle both add and edit
     const save = useCallback(async (id: number) => {
@@ -255,7 +265,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         } finally {
             setLoading(false);
         }
-    }, [form, config.service, config.name, fetchEntities, sortField, sortDirection, filters, push]);
+    }, [form, config.service, config.name, sortField, sortDirection, filters, push]);
 
     // Determine table props based on style setting - memoized to prevent recalculation
     const tableProps = useMemo(() => {
@@ -276,6 +286,25 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
         }
     }, [editingKey, edit]);
 
+    // Single change detection function for the whole form
+    const triggerChangeDetection = useCallback(() => {
+        setTimeout(() => {
+            const currentValues = form.getFieldsValue();
+            const editingRecord = entities.find(e => e.id === editingKey);
+            if (!editingRecord) return;
+            
+            const changed = Object.keys(currentValues).some(key => {
+                const current = currentValues[key];
+                const original = originalValues[key];
+                // Handle null/undefined/empty string comparison
+                const currentNormalized = current === null || current === undefined ? '' : String(current);
+                const originalNormalized = original === null || original === undefined ? '' : String(original);
+                return currentNormalized !== originalNormalized;
+            });
+            setHasChanges(changed || editingRecord.id < 0);
+        }, 0);
+    }, [form, entities, editingKey, originalValues]);
+
     const columns: ColumnsType<T> = useMemo(() => [
         ...config.columns.map((columnConfig) => ({
             title: columnConfig.title,
@@ -287,17 +316,6 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
             render: (_: unknown, record: T) => {
                 const editing = isEditing(record);
                 const error = fieldErrors[record.id]?.[columnConfig.key as string];
-                
-                // Change detection function to share with custom renderers
-                const triggerChangeDetection = () => {
-                    setTimeout(() => {
-                        const currentValues = form.getFieldsValue();
-                        const changed = Object.keys(currentValues).some(key => 
-                            currentValues[key] !== originalValues[key]
-                        );
-                        setHasChanges(changed || record.id < 0);
-                    }, 0);
-                };
 
                 // Use custom renderer if provided
                 if (columnConfig.customRenderer) {
@@ -323,12 +341,11 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 );
             },
         })),
-    ], [config.columns, config.name, editingKey, fieldErrors, originalValues, form]);
+    ], [config.columns, isEditing, fieldErrors, triggerChangeDetection, save, cancel]);
 
     // Memoize layout style to prevent recalculation
     const layoutStyle = useMemo(() => createLayoutStyle(), []);
     const actionButtonContainerStyle = useMemo(() => createActionButtonContainerStyle(), []);
-    const editingRowStyle = useMemo(() => createEditingRowStyle(), []);
 
     // Memoize pagination to prevent recreation
     const paginationConfig = useMemo(() => ({ pageSize: tableConfig.pageSize }), []);
@@ -398,7 +415,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 <Button 
                     icon={<PlusOutlined />}
                     onClick={handleAdd}
-                    size="small"
+                    size="middle"
                     style={{ 
                         backgroundColor: '#f0f9ff', 
                         borderColor: '#bae6fd', 
@@ -417,7 +434,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                         <Button 
                             icon={<CheckOutlined />}
                             onClick={handleDelete}
-                            size="small"
+                            size="middle"
                             style={{ 
                                 backgroundColor: '#fef7f7', 
                                 borderColor: '#fecdd3', 
@@ -430,7 +447,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                                 setShowDeleteConfirm(false);
                                 cancel();
                             }}
-                            size="small"
+                            size="middle"
                         />
                     </Space>
                 );
@@ -444,7 +461,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                                     type="primary"
                                     icon={<CheckOutlined />}
                                     onClick={() => save(editingRecord.id)}
-                                    size="small"
+                                    size="middle"
                                 />
                                 <Button 
                                     icon={<CloseOutlined />}
@@ -455,7 +472,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                                         }
                                         cancel();
                                     }}
-                                    size="small"
+                                    size="middle"
                                 />
                             </>
                         )}
@@ -463,7 +480,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                             <Button 
                                 icon={<MinusOutlined />}
                                 onClick={() => setShowDeleteConfirm(true)}
-                                size="small"
+                                size="middle"
                                 style={{ 
                                     backgroundColor: '#fef7f7', 
                                     borderColor: '#fecdd3', 
@@ -497,13 +514,69 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                         }}
                         {...tableProps}
                         onChange={handleTableChange}
-                        onRow={(record: T) => ({
-                            onDoubleClick: () => handleRowClick(record),
-                            style: { 
-                                cursor: editingKey === null ? 'pointer' : 'default',
-                                ...(isEditing(record) ? editingRowStyle : {})
+                        rowClassName={(record: T) => {
+                            const editing = isEditing(record);
+                            if (!editing) return '';
+                            
+                            if (showDeleteConfirm && record.id === editingKey) {
+                                return 'editing-row-delete';
+                            } else if (hasChanges && record.id > 0) {
+                                return 'editing-row-save';
+                            } else if (record.id < 0) {
+                                return 'editing-row-add';
                             }
-                        })}
+                            return 'editing-row';
+                        }}
+                        onRow={(record: T) => {
+                            const editing = isEditing(record);
+                            let rowStyle = {};
+                            
+                            if (editing) {
+                                if (showDeleteConfirm && record.id === editingKey) {
+                                    // Red background for delete confirmation
+                                    rowStyle = {
+                                        backgroundColor: '#fef2f2', // red-50
+                                        borderColor: '#fecaca', // red-200
+                                    };
+                                } else if (hasChanges && record.id > 0) {
+                                    // Yellow background for unsaved changes (save confirm)
+                                    rowStyle = {
+                                        backgroundColor: '#fefce8', // yellow-50
+                                        borderColor: '#fde047', // yellow-300
+                                    };
+                                } else if (record.id < 0) {
+                                    // Pale blue background for add mode (like add button)
+                                    rowStyle = {
+                                        backgroundColor: '#f0f9ff', // sky-50
+                                        borderColor: '#bae6fd', // sky-200
+                                    };
+                                }
+                                // Add subtle border to all editing rows
+                                rowStyle = {
+                                    ...rowStyle,
+                                    borderWidth: '2px',
+                                    borderStyle: 'solid',
+                                };
+                            }
+                            
+                            return {
+                                onClick: () => handleRowClick(record),
+                                onMouseEnter: editing ? (event) => {
+                                    // Preserve custom background color on hover for editing rows
+                                    const target = event.currentTarget as HTMLElement;
+                                    Object.assign(target.style, rowStyle);
+                                } : undefined,
+                                onMouseLeave: editing ? (event) => {
+                                    // Maintain custom background color on mouse leave for editing rows
+                                    const target = event.currentTarget as HTMLElement;
+                                    Object.assign(target.style, rowStyle);
+                                } : undefined,
+                                style: { 
+                                    cursor: editingKey === null ? 'pointer' : 'default',
+                                    ...rowStyle
+                                }
+                            };
+                        }}
                         scroll={{ x: 'max-content' }}
                         tableLayout="fixed"
                     />
