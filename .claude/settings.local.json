@@ -87,7 +87,25 @@
       "Bash(gh repo create:*)",
       "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra remote set-url origin git@github.com:damiansirbu-org/estopia-infra.git)",
       "Bash(ssh:*)",
-      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend add estopia-backend.sh)"
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-backend add estopia-backend.sh)",
+      "Bash(npm audit:*)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web add estopia-web.sh)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web commit -m \"Add dockerize command and fix infrastructure script references\n\n- Add dockerize command to build estopia-web:1.0.0 Docker image\n- dockerize builds image only, container orchestration handled by estopia-infra\n- Fix help text to reference ./estopia-infra.sh consistently\n- Remove references to separate start-dependencies.sh scripts\n- Maintain uniform script naming convention across repositories\")",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web push origin main)",
+      "Bash(./estopia-web.sh dockerize:*)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra rm Dockerfile)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra rm -rf scripts/)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra add estopia-infra.sh)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra commit -m \"Create uniform infrastructure management script\n\n- Remove misplaced Dockerfile (belongs in backend repository)\n- Replace separate scripts/ directory with single estopia-infra.sh\n- Add comprehensive infrastructure management commands:\n  - start: Full production stack (frontend, backend, database, pgAdmin)\n  - start-deps: Dependencies only for development (database, pgAdmin)\n  - stop: Stop all services (both production and development)\n  - status: Show status of all services\n  - logs: View logs for all or specific services\n- Maintain uniform script naming convention across repositories\n- Clean separation of concerns: infra handles orchestration, apps handle builds\")",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra push origin main)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra add docker-compose.yml)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra commit -m \"Fix docker-compose to use pre-built images instead of building\n\n- Replace build contexts with image references for frontend and backend\n- Use estopia-web:1.0.0 and estopia-backend:1.0.0 pre-built images\n- Eliminates unnecessary build time when starting infrastructure\n- Images must be built first using dockerize commands in respective repos\n- Clean separation: apps build images, infra orchestrates containers\")",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-infra)",
+      "Bash(/c/Work/Git/damiansirbu/estopia-infra/estopia-infra.sh:*)",
+      "Bash(docker system prune:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web add .claude/settings.local.json package-lock.json)"
     ],
     "deny": []
   }
