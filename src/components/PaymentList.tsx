@@ -145,14 +145,20 @@ export default function PaymentList() {
           ...column,
           customRenderer: (record: Payment, editing: boolean, fieldErrors?: Record<string, string>, triggerChangeDetection?: () => void) => {
             if (!editing) {
-              return record.isPaid ? 'Yes' : 'No';
+              // Calculate isPaid based on amountTotal and amountPaid
+              const isPaidCalculated = (record.amountTotal || 0) <= (record.amountPaid || 0) && (record.amountTotal || 0) > 0;
+              return isPaidCalculated ? 'Yes' : 'No';
             }
+            
+            // Calculate the current isPaid value based on amounts
+            const isPaidCalculated = (record.amountTotal || 0) <= (record.amountPaid || 0) && (record.amountTotal || 0) > 0;
             
             return (
               <Form.Item 
                 name="isPaid" 
                 style={{ margin: 0 }}
                 valuePropName="checked"
+                initialValue={isPaidCalculated}
                 normalize={(value) => {
                   // Ensure we always have a boolean value
                   return Boolean(value);
@@ -163,10 +169,17 @@ export default function PaymentList() {
                     const isChecked = e.target.checked;
                     
                     if (isChecked && record.amountTotal) {
-                      // Auto-fill paid amount with total amount
+                      // Auto-fill paid amount with total amount when checked
                       if (formRef.current) {
                         formRef.current.setFieldsValue({
                           amountPaid: record.amountTotal
+                        });
+                      }
+                    } else if (!isChecked) {
+                      // When unchecked, set paid amount to 0 (showing full remaining amount)
+                      if (formRef.current) {
+                        formRef.current.setFieldsValue({
+                          amountPaid: 0
                         });
                       }
                     }
@@ -179,6 +192,36 @@ export default function PaymentList() {
                     }
                     
                     if (triggerChangeDetection) triggerChangeDetection();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Find the EntityList container and trigger save
+                      const tableRow = e.currentTarget.closest('tr');
+                      if (tableRow) {
+                        // Create a keyboard event that bubbles up to the table
+                        const enterEvent = new KeyboardEvent('keydown', {
+                          key: 'Enter',
+                          bubbles: true,
+                          cancelable: true
+                        });
+                        tableRow.dispatchEvent(enterEvent);
+                      }
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const tableRow = e.currentTarget.closest('tr');
+                      if (tableRow) {
+                        const escapeEvent = new KeyboardEvent('keydown', {
+                          key: 'Escape',
+                          bubbles: true,
+                          cancelable: true
+                        });
+                        tableRow.dispatchEvent(escapeEvent);
+                      }
+                    }
                   }}
                 />
               </Form.Item>
@@ -246,6 +289,34 @@ export default function PaymentList() {
                       }
                       if (triggerChangeDetection) triggerChangeDetection();
                     }, 0);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const tableRow = e.currentTarget.closest('tr');
+                      if (tableRow) {
+                        const enterEvent = new KeyboardEvent('keydown', {
+                          key: 'Enter',
+                          bubbles: true,
+                          cancelable: true
+                        });
+                        tableRow.dispatchEvent(enterEvent);
+                      }
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const tableRow = e.currentTarget.closest('tr');
+                      if (tableRow) {
+                        const escapeEvent = new KeyboardEvent('keydown', {
+                          key: 'Escape',
+                          bubbles: true,
+                          cancelable: true
+                        });
+                        tableRow.dispatchEvent(escapeEvent);
+                      }
+                    }
                   }}
                 />
               </Form.Item>

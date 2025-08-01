@@ -315,11 +315,17 @@ export const paymentService = {
       );
     }
     if (!response.success) throw new Error(response.message || 'API error');
-    return response.data || [];
+    
+    // Calculate isPaid for each payment (UI-only field)
+    const payments = response.data || [];
+    return payments.map(payment => ({
+      ...payment,
+      isPaid: (payment.amountTotal || 0) <= (payment.amountPaid || 0) && (payment.amountTotal || 0) > 0
+    }));
   },
 
   async createPayment(payment: CreatePaymentRequest): Promise<Payment> {
-    return apiCall(() =>
+    const createdPayment = await apiCall<Payment>(() =>
       fetch(`${API_BASE_URL}/payments`, {
         method: 'POST',
         headers: {
@@ -328,10 +334,16 @@ export const paymentService = {
         body: JSON.stringify(payment),
       })
     );
+    
+    // Calculate isPaid for the created payment (UI-only field)
+    return {
+      ...createdPayment,
+      isPaid: (createdPayment.amountTotal || 0) <= (createdPayment.amountPaid || 0) && (createdPayment.amountTotal || 0) > 0
+    };
   },
 
   async updatePayment(id: number, payment: UpdatePaymentRequest): Promise<Payment> {
-    return apiCall(() =>
+    const updatedPayment = await apiCall<Payment>(() =>
       fetch(`${API_BASE_URL}/payments/${id}`, {
         method: 'PUT',
         headers: {
@@ -340,6 +352,12 @@ export const paymentService = {
         body: JSON.stringify(payment),
       })
     );
+    
+    // Calculate isPaid for the updated payment (UI-only field)
+    return {
+      ...updatedPayment,
+      isPaid: (updatedPayment.amountTotal || 0) <= (updatedPayment.amountPaid || 0) && (updatedPayment.amountTotal || 0) > 0
+    };
   },
 
   async deletePayment(id: number): Promise<void> {
