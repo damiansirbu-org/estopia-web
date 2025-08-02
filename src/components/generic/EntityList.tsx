@@ -260,7 +260,11 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
             } else if (_error && (_error as { errorFields?: unknown }).errorFields) {
                 // AntD form validation error, do nothing
             } else {
-                push(id < 0 ? 'Add failed' : 'Update failed', 'error');
+                // Show the actual error message from the backend
+                const errorMessage = _error && typeof _error === 'object' && 'message' in _error 
+                    ? (_error as { message: string }).message 
+                    : (id < 0 ? 'Add failed' : 'Update failed');
+                push(errorMessage, 'error');
             }
         } finally {
             setLoading(false);
