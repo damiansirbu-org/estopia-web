@@ -25,40 +25,20 @@ interface ApiResponse<T> {
 
 // Helper function to extract data from wrapped API responses
 function extractData<T>(apiResponse: ApiResponse<T>): T {
-  const timestamp = new Date().toISOString();
-  const cacheId = Date.now().toString(36);
-  
-  console.log(`🔍 [${timestamp}] extractData called with cache ID: ${cacheId}`);
-  console.log(`📦 [${cacheId}] Raw API response:`, { 
-    apiResponse,
-    apiResponseType: typeof apiResponse 
-  });
-  
-  // Detailed debugging for the exact failure point
-  console.log(`🔎 [${cacheId}] Checking apiResponse exists:`, !!apiResponse);
-  console.log(`🔎 [${cacheId}] Checking apiResponse type:`, typeof apiResponse);
-  
   if (!apiResponse || typeof apiResponse !== 'object') {
-    console.error(`❌ [${cacheId}] Invalid API response format - apiResponse:`, apiResponse, 'type:', typeof apiResponse);
     throw new Error('Invalid API response format');
   }
   
-  console.log(`🔎 [${cacheId}] Checking apiResponse.success:`, apiResponse.success);
-  
   if (!apiResponse.success) {
-    console.error(`❌ [${cacheId}] API returned success=false:`, apiResponse);
     throw new Error(apiResponse.message || 'API request failed');
   }
   
-  console.log(`🔎 [${cacheId}] Checking apiResponse.data:`, apiResponse.data);
-  console.log(`✅ [${cacheId}] Successfully extracting data:`, apiResponse.data);
   return apiResponse.data;
 }
 
 // Client API Service
 export const clientService = {
   async getAllClients(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Client[]> {
-    console.log('🚀 getAllClients called with params:', params);
     try {
       if (params && params.filters && Object.keys(params.filters).length > 0) {
       // Use POST /api/clients/filter for filtering
@@ -84,7 +64,6 @@ export const clientService = {
         return extractData<Client[]>(response);
       }
     } catch (error) {
-      console.error('❌ getAllClients error:', error);
       throw error;
     }
   },
@@ -112,9 +91,6 @@ export const clientService = {
 // Asset API Service
 export const assetService = {
   async getAllAssets(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<Asset[]> {
-    const cacheId = Date.now().toString(36);
-    console.log(`🚀 [${cacheId}] assetService.getAllAssets called with params:`, params);
-    
     try {
       if (params && params.filters && Object.keys(params.filters).length > 0) {
         // Use POST /api/assets/filter for filtering
@@ -124,9 +100,7 @@ export const assetService = {
         if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
         if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
         const queryString = query.length > 0 ? `?${query.join('&')}` : '';
-        const url = `/assets/filter${queryString}`;
-        console.log(`📡 [${cacheId}] Making POST request to:`, url, 'with body:', filterDTO);
-        const response = await apiClient.post(url, filterDTO);
+        const response = await apiClient.post(`/assets/filter${queryString}`, filterDTO);
         return extractData<Asset[]>(response);
       } else {
         // No filters: use GET /api/assets with optional sort params
@@ -138,13 +112,10 @@ export const assetService = {
           query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
         }
         const queryString = query.length > 0 ? `?${query.join('&')}` : '';
-        const url = `/assets${queryString}`;
-        console.log(`📡 [${cacheId}] Making GET request to:`, url);
-        const response = await apiClient.get(url);
+        const response = await apiClient.get(`/assets${queryString}`);
         return extractData<Asset[]>(response);
       }
     } catch (error) {
-      console.error(`❌ [${cacheId}] assetService.getAllAssets error:`, error);
       throw error;
     }
   },

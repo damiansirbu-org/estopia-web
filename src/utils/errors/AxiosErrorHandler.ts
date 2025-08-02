@@ -35,20 +35,6 @@ class AxiosErrorHandler {
         // Add request ID for tracking
         config.headers['X-Request-ID'] = this.generateRequestId();
         
-        // Add cache-busting headers for development - TEMPORARILY DISABLED
-        // if (import.meta.env.DEV) {
-        //   const timestamp = Date.now();
-        //   config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-        //   config.headers['Pragma'] = 'no-cache';
-        //   config.headers['Expires'] = '0';
-        //   config.headers['X-Cache-Bust'] = timestamp.toString(36);
-        //   
-        //   // Add cache-busting to URL params for GET requests
-        //   if (config.method === 'get') {
-        //     config.params = { ...config.params, _cb: timestamp };
-        //   }
-        // }
-        
         // Log outgoing requests in development
         if (import.meta.env.DEV) {
           console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
