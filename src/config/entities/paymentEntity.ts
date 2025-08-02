@@ -8,7 +8,7 @@ const createEmptyPayment = (): Payment => ({
   id: 0, // This will be overridden with negative ID in EntityList
   assetId: null as unknown as number, // Will be set when asset is selected
   assetName: '',
-  dueDate: '',
+  dueDate: null as unknown as string,
   amountRent: 0,
   amountMaintenance: undefined,
   amountNaturalGas: undefined,
@@ -19,7 +19,7 @@ const createEmptyPayment = (): Payment => ({
   amountTotal: 0, // Will be calculated in backend
   amountPaid: undefined,
   isPaid: false,
-  paymentDate: undefined,
+  paymentDate: null as unknown as string,
   notes: '',
 });
 

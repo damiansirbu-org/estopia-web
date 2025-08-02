@@ -105,7 +105,12 @@
       "Bash(docker system prune:*)",
       "Bash(docker stop:*)",
       "Bash(docker rm:*)",
-      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web add .claude/settings.local.json package-lock.json)"
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web add .claude/settings.local.json package-lock.json)",
+      "Bash(git -C /c/Work/Git/damiansirbu/estopia-web commit -m \"Update development settings and package lock\n\n- Updated .claude/settings.local.json with latest tool permissions\n- Updated package-lock.json from npm dependency resolution\n- Maintenance commit for development environment consistency\")",
+      "Bash(powershell:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(docker system:*)",
+      "Bash(docker volume prune:*)"
     ],
     "deny": []
   }

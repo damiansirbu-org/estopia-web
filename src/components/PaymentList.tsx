@@ -5,7 +5,7 @@ import EntityList from './generic/EntityList';
 import AssetSelectionModal from './common/AssetSelectionModal';
 import { paymentEntityConfig } from '../config/entities/paymentEntity';
 import { contractService } from '../services/api';
-import { DATE_FORMAT, parseDate, formatDate } from '../utils/dateUtils';
+import { DATE_FORMAT, parseDate, formatDate, formatDateForApi } from '../utils/dateUtils';
 import { useTerminal } from '../context/useTerminal';
 import type { Payment, Asset } from '../types/models';
 
@@ -110,7 +110,7 @@ export default function PaymentList() {
                   value: parseDate(value),
                 })}
                 normalize={(value) => {
-                  return value ? formatDate(value) : '';
+                  return formatDateForApi(value);
                 }}
               >
                 <DatePicker

@@ -9,6 +9,12 @@ export const formatDate = (date: string | Dayjs | null | undefined): string => {
   return dayjs(date).format(DATE_FORMAT);
 };
 
+// Format date for API (null instead of empty string)
+export const formatDateForApi = (date: string | Dayjs | null | undefined): string | null => {
+  if (!date) return null;
+  return dayjs(date).format(DATE_FORMAT);
+};
+
 // Parse date from string to dayjs object
 export const parseDate = (date: string | null | undefined): Dayjs | null => {
   if (!date) return null;

@@ -13,8 +13,7 @@ import type {
   UpdateContractRequest,
   UpdatePaymentRequest
 } from '../types/models';
-import type { ApiResponse } from '../utils/ErrorHandler';
-import { apiCall } from '../utils/ErrorHandler';
+import { apiClient, type ValidationError } from '../utils/ErrorHandler';
 
 // API Base URL
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -325,15 +324,8 @@ export const paymentService = {
   },
 
   async createPayment(payment: CreatePaymentRequest): Promise<Payment> {
-    const createdPayment = await apiCall<Payment>(() =>
-      fetch(`${API_BASE_URL}/payments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payment),
-      })
-    );
+    const response = await apiClient.post<{success: boolean, data: Payment}>('/payments', payment);
+    const createdPayment = response.data;
     
     // Calculate isPaid for the created payment (UI-only field)
     return {
