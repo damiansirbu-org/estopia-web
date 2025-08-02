@@ -68,6 +68,23 @@ export class ErrorFactory {
   }
   
   /**
+   * Create error from Quarkus ApiResponse format
+   */
+  static fromQuarkusApiResponse(response: any): BaseApiError {
+    const fieldErrors: FieldError[] = response.errors?.map((e: any) => ({
+      field: e.field,
+      message: e.message,
+      rejectedValue: undefined
+    })) || [];
+    
+    if (fieldErrors.length > 0) {
+      return new ValidationError(response.message, fieldErrors);
+    }
+    
+    return new BusinessError(response.message, 400, 'Bad Request');
+  }
+  
+  /**
    * Create error from HTTP response
    */
   static fromHttpResponse(status: number, data: unknown, url?: string): BaseApiError {
@@ -79,6 +96,11 @@ export class ErrorFactory {
     // Try to parse as legacy ApiResponseError format
     if (this.isApiResponseError(data)) {
       return this.fromApiResponseError(data);
+    }
+    
+    // Try to parse as Quarkus ApiResponse format with field errors
+    if (this.isQuarkusApiResponse(data)) {
+      return this.fromQuarkusApiResponse(data);
     }
     
     // Fallback to generic error based on status
@@ -143,6 +165,16 @@ export class ErrorFactory {
       'success' in data &&
       (data as ApiResponseError).success === false &&
       'message' in data
+    );
+  }
+  
+  private static isQuarkusApiResponse(data: unknown): boolean {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'success' in data &&
+      'message' in data &&
+      (data as any).success === false
     );
   }
   
