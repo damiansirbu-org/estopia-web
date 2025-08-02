@@ -16,7 +16,7 @@ import {
   createSearchInputStyle,
 } from '../../theme/styleHelpers';
 import type { BaseEntity, EntityConfig } from '../../types/entity/entityConfig';
-import { EstopiaError } from '../../utils/ErrorHandler';
+import { EstopiaError, ValidationError } from '../../utils/ErrorHandler';
 
 const { Title: _Title } = Typography;
 
@@ -249,7 +249,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                 push(`${config.name} updated`, 'success');
             }
         } catch (_error) {
-            if (_error instanceof EstopiaError && _error.fieldErrors) {
+            if (_error instanceof ValidationError && _error.fieldErrors) {
                 const fe: Record<string, string> = {};
                 for (const e of _error.fieldErrors) {
                     fe[e.field] = e.message;

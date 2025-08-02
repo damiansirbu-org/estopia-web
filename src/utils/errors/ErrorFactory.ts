@@ -9,9 +9,9 @@ import {
   ServerError,
   NetworkError,
   TimeoutError,
-  ErrorResponse,
-  ApiResponseError,
-  FieldError
+  type ErrorResponse,
+  type ApiResponseError,
+  type FieldError
 } from './ErrorTypes';
 
 /**

@@ -5,9 +5,14 @@ import HelpModal from './common/HelpModal';
 interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  buildInfo?: {
+    timestamp: number;
+    version: string;
+    build: string;
+  };
 }
 
-function Header({ activeTab, setActiveTab }: HeaderProps) {
+function Header({ activeTab, setActiveTab, buildInfo }: HeaderProps) {
   const [helpVisible, setHelpVisible] = useState(false);
   
   const tabs = [
@@ -49,7 +54,14 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
 
           {/* Logo and User Menu */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl text-white tracking-widest" style={{ fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>ESTOPIA</h1>
+            <div className="flex flex-col items-end">
+              <h1 className="text-2xl text-white tracking-widest" style={{ fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>ESTOPIA</h1>
+              {buildInfo && (
+                <div className="text-xs text-gray-400" title={`Build: ${buildInfo.build}\nCache ID: ${buildInfo.timestamp.toString(36)}`}>
+                  Debug v2 • {buildInfo.version} • {buildInfo.timestamp.toString(36)}
+                </div>
+              )}
+            </div>
             <button
               className="p-2 text-gray-300 hover:text-white hover:bg-gray-600 rounded-md"
               onClick={() => setHelpVisible(true)}

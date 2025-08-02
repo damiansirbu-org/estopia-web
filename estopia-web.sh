@@ -9,7 +9,23 @@
 
 set -e
 
+# Ensure we're in the script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 ACTION="$1"
+PARAM2="$2"
+PARAM3="$3"
+
+# Handle combined commands like "clean fix build"
+if [[ "$ACTION" == "clean" && "$PARAM2" == "fix" && "$PARAM3" == "build" ]]; then
+    echo "🔄 Running: clean → fix → build"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    cd "$SCRIPT_DIR"
+    ./estopia-web.sh clean
+    ./estopia-web.sh build
+    exit 0
+fi
 
 show_help() {
     echo "🏗️  Estopia Frontend Management Script"
@@ -17,8 +33,9 @@ show_help() {
     echo "Usage: ./estopia-web.sh [command]"
     echo ""
     echo "Commands:"
-    echo "  clean                Clean build artifacts and cache"
+    echo "  clean [full]         Clean build artifacts and cache (add 'full' to also remove node_modules)"
     echo "  build                Build the frontend for production"
+    echo "  clean fix build      Combined: clean → build (non-interactive)"
     echo "  start                Start the frontend development server"
     echo "  stop                 Stop the frontend development server"
     echo "  dockerize            Build frontend Docker image (estopia-web:1.0.0)"
@@ -26,7 +43,9 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  ./estopia-web.sh clean"
+    echo "  ./estopia-web.sh clean full"
     echo "  ./estopia-web.sh build"
+    echo "  ./estopia-web.sh clean fix build     # 🔄 Clean and build"
     echo "  ./estopia-web.sh start"
     echo "  ./estopia-web.sh dockerize            # 🐳 Build Docker image"
     echo "  ./estopia-web.sh stop"
@@ -58,10 +77,8 @@ case "$ACTION" in
             rm -rf .vite
         fi
         
-        # Option to clean node_modules
-        read -p "🤔 Also remove node_modules? (y/N) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
+        # Check for 'full' parameter to also clean node_modules
+        if [[ "$2" == "full" ]]; then
             if [ -d "node_modules" ]; then
                 echo "🗑️ Removing node_modules..."
                 rm -rf node_modules

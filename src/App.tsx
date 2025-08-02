@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ConfigProvider } from 'antd';
 import AssetList from './components/AssetList';
 import ClientList from './components/ClientList';
@@ -14,8 +14,22 @@ import { useTerminal } from './context/useTerminal';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 
+// Build info for cache busting
+const BUILD_INFO = {
+  timestamp: Date.now(),
+  version: '1.0.0',
+  build: `${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC`
+};
+
 function AppContent() {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Log build info for debugging
+  useEffect(() => {
+    console.log('🚀 Estopia Frontend Build Info:', BUILD_INFO);
+    console.log('📅 Build Timestamp:', new Date(BUILD_INFO.timestamp).toLocaleString());
+    console.log('🔄 Cache Bust ID:', BUILD_INFO.timestamp.toString(36));
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -38,7 +52,7 @@ function AppContent() {
 
   return (
     <div className="flex flex-col h-full">
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} buildInfo={BUILD_INFO} />
       <main className="flex-1 overflow-hidden" style={{ 
         margin: '0.5rem',
         marginBottom: '23.5vh', // Space for console (22vh) + gap

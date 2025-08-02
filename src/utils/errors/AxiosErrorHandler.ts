@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 import { ErrorFactory } from './ErrorFactory';
 import { BaseApiError, NetworkError, TimeoutError } from './ErrorTypes';
 
@@ -35,8 +35,22 @@ class AxiosErrorHandler {
         // Add request ID for tracking
         config.headers['X-Request-ID'] = this.generateRequestId();
         
+        // Add cache-busting headers for development - TEMPORARILY DISABLED
+        // if (import.meta.env.DEV) {
+        //   const timestamp = Date.now();
+        //   config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        //   config.headers['Pragma'] = 'no-cache';
+        //   config.headers['Expires'] = '0';
+        //   config.headers['X-Cache-Bust'] = timestamp.toString(36);
+        //   
+        //   // Add cache-busting to URL params for GET requests
+        //   if (config.method === 'get') {
+        //     config.params = { ...config.params, _cb: timestamp };
+        //   }
+        // }
+        
         // Log outgoing requests in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
             data: config.data,
             params: config.params,
@@ -57,10 +71,11 @@ class AxiosErrorHandler {
     this.axiosInstance.interceptors.response.use(
       (response: AxiosResponse) => {
         // Log successful responses in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
             status: response.status,
             data: response.data,
+            requestId: response.config.headers?.['X-Request-ID'],
           });
         }
         
@@ -95,7 +110,7 @@ class AxiosErrorHandler {
       apiError = ErrorFactory.fromHttpResponse(status, data, error.config?.url);
       
       // Log error details in development
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.error(`❌ API Error: ${config?.method?.toUpperCase()} ${config?.url}`, {
           status,
           data,
