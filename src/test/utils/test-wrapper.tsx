@@ -1,7 +1,8 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 import { TerminalProvider } from '../../context/TerminalContext'
-import { ErrorProvider } from '../../context/ErrorProvider'
-import { ThemeContext } from '../../context/ThemeContext'
+import ErrorProvider from '../../context/ErrorProvider'
+import { ThemeContext } from '../../context/ThemeContextDefinition'
 
 interface TestWrapperProps {
   children: React.ReactNode
@@ -29,8 +30,6 @@ export function TestWrapper({ children }: TestWrapperProps) {
 
 // Custom render function that wraps components with providers
 export function renderWithProviders(ui: React.ReactElement, options = {}) {
-  const { render } = require('@testing-library/react')
-  
   return render(ui, {
     wrapper: TestWrapper,
     ...options

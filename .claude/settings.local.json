@@ -129,7 +129,13 @@
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add .)",
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus push origin main)",
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-web status)",
-      "Bash(git -C c:/Work/Git/damiansirbu/estopia-web add .)"
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-web add .)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-web push origin main)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-infra add .)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-infra push origin main)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add Dockerfile)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus log --oneline -5)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus fetch origin)"
     ],
     "deny": []
   }
