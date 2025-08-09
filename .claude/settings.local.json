@@ -135,7 +135,9 @@
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-infra push origin main)",
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add Dockerfile)",
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus log --oneline -5)",
-      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus fetch origin)"
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus fetch origin)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus status --ignored)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add -f .mvn/wrapper/)"
     ],
     "deny": []
   }

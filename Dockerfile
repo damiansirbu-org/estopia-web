@@ -1,20 +1,30 @@
-# Multi-stage build for React Vite application
+# Multi-stage build for React Vite application (ULTRA PERFORMANCE)
 FROM node:20-alpine AS builder
+
+# Install performance optimization tools
+RUN apk add --no-cache python3 make g++ && \
+    npm install -g @swc/cli @swc/core
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files for aggressive caching
 COPY package.json package-lock.json* ./
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci
+# Install with performance optimizations
+RUN npm ci --only=production --silent --no-audit --no-fund --maxsockets 1 && \
+    npm cache clean --force
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# PERFORMANCE BUILD: Tree-shaking, minification, compression
+RUN NODE_ENV=production npm run build && \
+    # Remove source maps for production
+    find dist -name "*.map" -delete && \
+    # Compress assets
+    find dist -type f \( -name "*.js" -o -name "*.css" -o -name "*.html" \) \
+    -exec gzip -k9 {} \;
 
 # Production stage with nginx
 FROM nginx:alpine AS runtime

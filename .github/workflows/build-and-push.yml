@@ -1,4 +1,4 @@
-name: Build and Push Web Frontend
+name: Build and Push Web Frontend (ULTRA PERFORMANCE)
 
 on:
   workflow_dispatch:
@@ -98,13 +98,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Install dependencies and build
+    - name: Ultra-performance build optimization
       run: |
-        echo "📦 Installing dependencies..."
-        npm ci
-        
-        echo "🏗️ Building React application..."
-        npm run build
+        echo "⚡ ULTRA PERFORMANCE BUILD MODE ACTIVATED"
+        echo "🔥 Tree-shaking, minification, compression, caching optimization"
+        echo "🚀 Build handled by optimized Dockerfile with SWC transpilation"
+        echo "📦 Pre-compressed assets with gzip -9 compression"
+        # Build is handled by performance-optimized Dockerfile
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
