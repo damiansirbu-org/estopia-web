@@ -1,69 +1,35 @@
-# React + TypeScript + Vite
+# Estopia Web Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Property management web interface built with React 18 + TypeScript + Vite.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Quick Start
+```bash
+./estopia-web.sh start      # Development server
+./estopia-web.sh build      # Production build
+./estopia-web.sh test       # Run tests
+./estopia-web.sh dockerize  # Build Docker image
+./estopia-web.sh publish    # Push to Docker Hub
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
+- **Framework**: React 18.3.1 + TypeScript
+- **Build**: Vite 7.0.4 (fast dev server)
+- **UI**: Ant Design 5.26.6 (enterprise components)
+- **HTTP**: Axios 1.10.0
+- **Testing**: Vitest + Testing Library + MSW
+- **Deployment**: Nginx + Docker (81MB image)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Architecture
+Modern React application with CRUD operations for property management entities.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Documentation
+- **[Architecture](doc/architecture.md)** - Component structure and data flow
+- **[Standards](doc/standards.md)** - Code quality and React best practices
+- **[Requirements](doc/requirements.md)** - UI/UX specifications
+- **[Implementation](doc/implementation.md)** - Technical implementation details
+- **[TODO](doc/todo.md)** - Current development tasks
+
+## Development
+- **URL**: http://localhost:5173
+- **Backend**: Connects to estopia-quarkus at :8080
+- **Hot Reload**: Instant updates during development

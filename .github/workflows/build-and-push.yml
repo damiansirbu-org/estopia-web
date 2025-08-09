@@ -1,123 +1,82 @@
-name: Build and Push Web Frontend (ULTRA PERFORMANCE)
+name: Build & Push Frontend
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g., v1.0.0, latest)'
+        description: 'Image tag'
         required: true
         default: 'latest'
         type: string
-      run_tests:
-        description: 'Run tests and linting'
-        required: false
-        default: true
-        type: boolean
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: estopia-web
+  IMAGE: estopia-web
+  NODE_VERSION: 20
 
 jobs:
   test:
-    name: Run Tests and Linting
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.run_tests == 'true' }}
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: |
-        echo "📦 Installing dependencies..."
-        npm ci
-
-    - name: Run linting
-      run: |
-        echo "🔍 Running ESLint..."
-        npm run lint
-
-    - name: Run type checking
-      run: |
-        echo "🔎 Running TypeScript type checking..."
-        npm run type-check
-
-    - name: Run unit tests
-      run: |
-        echo "🧪 Running unit tests..."
-        npm run test:coverage
-      env:
-        CI: true
-
-    - name: Upload test coverage
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage/lcov.info
-        flags: frontend
-        name: estopia-web
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: |
-          coverage/
-          test-results.xml
-
-  build-and-push:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    needs: [test]
-    if: always() && (needs.test.result == 'success' || github.event.inputs.run_tests == 'false')
+    - uses: actions/checkout@v4
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Node.js
+    - name: Set up Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
+        node-version: ${{ env.NODE_VERSION }}
+        cache: npm
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run linting
+      run: npm run lint
+    
+    - name: Run type checking
+      run: npm run type-check
+    
+    - name: Run tests
+      run: npm run test
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Log in to Docker Hub
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: npm
+    
+    - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Ultra-performance build optimization
-      run: |
-        echo "⚡ ULTRA PERFORMANCE BUILD MODE ACTIVATED"
-        echo "🔥 Tree-shaking, minification, compression, caching optimization"
-        echo "🚀 Build handled by optimized Dockerfile with SWC transpilation"
-        echo "📦 Pre-compressed assets with gzip -9 compression"
-        # Build is handled by performance-optimized Dockerfile
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: |
+          image=moby/buildkit:v0.12.5
+    
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v6
       with:
         context: .
-        push: true
-        tags: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}
-        platforms: linux/amd64,linux/arm64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Output image details
-      run: |
-        echo "✅ Image built and pushed successfully!"
-        echo "🐳 Image: ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.version }}"
-        echo "📝 To deploy: Update docker-compose files with this image tag"
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: |
+          ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE }}:${{ github.event.inputs.version || 'latest' }}
+          ${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE }}:${{ github.sha }}
+        platforms: linux/amd64
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE }}:buildcache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE }}:buildcache,mode=max
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1

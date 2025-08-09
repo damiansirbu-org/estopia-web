@@ -137,7 +137,11 @@
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus log --oneline -5)",
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus fetch origin)",
       "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus status --ignored)",
-      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add -f .mvn/wrapper/)"
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add -f .mvn/wrapper/)",
+      "mcp__structured-thinking__process_thought",
+      "mcp__stackoverflow__search_questions",
+      "WebFetch(domain:quarkus.io)",
+      "Bash(git -C c:/Work/Git/damiansirbu/estopia-quarkus add .dockerignore)"
     ],
     "deny": []
   }

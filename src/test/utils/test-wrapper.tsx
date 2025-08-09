@@ -10,9 +10,10 @@ interface TestWrapperProps {
 
 // Mock theme context value
 const mockThemeValue = {
-  theme: 'light' as const,
-  setTheme: () => {},
-  toggleTheme: () => {}
+  currentTheme: 'light',
+  setCurrentTheme: () => {},
+  themes: [],
+  getThemeConfig: () => ({})
 }
 
 // Test wrapper component that provides all necessary contexts

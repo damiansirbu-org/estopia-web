@@ -9,6 +9,10 @@
 
 set -e
 
+# Docker Hub credentials (set these for publishing)
+export DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-damiansirbu}"
+export DOCKERHUB_TOKEN="${DOCKERHUB_TOKEN:-dckr_pat_hpBKFPJ-OoPVu1AEl7ugliEZfhM}"
+
 # Ensure we're in the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -39,7 +43,8 @@ show_help() {
     echo "  clean fix build      Combined: clean → build (non-interactive)"
     echo "  start                Start the frontend development server"
     echo "  stop                 Stop the frontend development server"
-    echo "  dockerize            Build frontend Docker image (estopia-web:1.0.0)"
+    echo "  dockerize            Build frontend Docker image (estopia-web:latest)"
+    echo "  publish [tag]        Push Docker image to registry (default: latest)"
     echo "  help                 Show this help message"
     echo ""
     echo "Examples:"
@@ -52,6 +57,7 @@ show_help() {
     echo "  ./estopia-web.sh clean fix build     # 🔄 Clean and build"
     echo "  ./estopia-web.sh start"
     echo "  ./estopia-web.sh dockerize            # 🐳 Build Docker image"
+    echo "  ./estopia-web.sh publish v1.0.0       # 📤 Publish to Docker Hub"
     echo "  ./estopia-web.sh stop"
     echo ""
     echo "💡 Dependencies (Database, pgAdmin):"
@@ -261,15 +267,44 @@ case "$ACTION" in
         
         # Build Docker image
         echo "🐳 Building Docker image..."
-        docker build -t estopia-web:1.0.0 .
+        docker build -t estopia-web:latest .
         
-        echo "✅ Docker image built successfully: estopia-web:1.0.0"
+        echo "✅ Docker image built successfully: estopia-web:latest"
+        echo "📊 Image size: $(docker images estopia-web:latest --format 'table {{.Size}}')"
         echo ""
-        echo "🚀 To start the frontend:"
-        echo "   cd ../estopia-infra && ./estopia-infra.sh start frontend"
+        echo "🚀 To test the image:"
+        echo "   docker run -p 80:80 estopia-web:latest"
         echo ""
-        echo "🏗️ To start full infrastructure:"
-        echo "   cd ../estopia-infra && ./estopia-infra.sh start"
+        echo "📤 To publish:"
+        echo "   ./estopia-web.sh publish [tag]"
+        ;;
+    publish)
+        TAG="${2:-latest}"
+        echo "📤 Publishing Docker image to registry..."
+        
+        # Check if image exists
+        if ! docker images | grep -q estopia-web; then
+            echo "❌ No estopia-web image found. Run './estopia-web.sh dockerize' first."
+            exit 1
+        fi
+        
+        # Tag for Docker Hub (assuming username from environment or config)
+        DOCKER_USER="${DOCKERHUB_USERNAME:-damiansirbu}"
+        
+        # Auto-login if token is available
+        if [ -n "$DOCKERHUB_TOKEN" ]; then
+            echo "🔑 Logging in to Docker Hub..."
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
+        fi
+        
+        echo "🏷️ Tagging image: $DOCKER_USER/estopia-web:$TAG"
+        docker tag estopia-web:latest $DOCKER_USER/estopia-web:$TAG
+        
+        echo "🚀 Pushing to Docker Hub..."
+        docker push $DOCKER_USER/estopia-web:$TAG
+        
+        echo "✅ Image published successfully!"
+        echo "🐳 Pull with: docker pull $DOCKER_USER/estopia-web:$TAG"
         ;;
     help|-h|--help)
         show_help

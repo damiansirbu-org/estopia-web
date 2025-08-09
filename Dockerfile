@@ -11,8 +11,8 @@ WORKDIR /app
 # Copy package files for aggressive caching
 COPY package.json package-lock.json* ./
 
-# Install with performance optimizations
-RUN npm ci --only=production --silent --no-audit --no-fund --maxsockets 1 && \
+# Install all dependencies (build requires dev dependencies)
+RUN npm ci --silent --no-audit --no-fund && \
     npm cache clean --force
 
 # Copy source code
