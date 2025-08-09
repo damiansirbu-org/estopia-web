@@ -35,6 +35,7 @@ show_help() {
     echo "Commands:"
     echo "  clean [full]         Clean build artifacts and cache (add 'full' to also remove node_modules)"
     echo "  build                Build the frontend for production"
+    echo "  test [type]          Run comprehensive tests (unit|simulation|validation|api-contract|coverage|all)"
     echo "  clean fix build      Combined: clean → build (non-interactive)"
     echo "  start                Start the frontend development server"
     echo "  stop                 Stop the frontend development server"
@@ -45,6 +46,9 @@ show_help() {
     echo "  ./estopia-web.sh clean"
     echo "  ./estopia-web.sh clean full"
     echo "  ./estopia-web.sh build"
+    echo "  ./estopia-web.sh test                 # 🧪 Run all tests"
+    echo "  ./estopia-web.sh test validation     # ✅ Run validation tests only" 
+    echo "  ./estopia-web.sh test simulation     # 🎯 Run API simulation tests"
     echo "  ./estopia-web.sh clean fix build     # 🔄 Clean and build"
     echo "  ./estopia-web.sh start"
     echo "  ./estopia-web.sh dockerize            # 🐳 Build Docker image"
@@ -123,6 +127,68 @@ case "$ACTION" in
         du -sh dist/ 2>/dev/null || echo "Build directory created"
         echo ""
         echo "🚀 To preview: npm run preview"
+        ;;
+    test)
+        TEST_TYPE="$2"
+        echo "🧪 Running Estopia Frontend Tests..."
+        
+        # Check if Node.js is available
+        if ! command -v node > /dev/null 2>&1; then
+            echo "❌ Node.js not found. Please install Node.js 18 or later."
+            exit 1
+        fi
+        
+        # Install dependencies if node_modules doesn't exist
+        if [ ! -d "node_modules" ]; then
+            echo "📦 Installing dependencies (including test dependencies)..."
+            npm install
+        fi
+        
+        # Use our comprehensive test script
+        if [ -f "./test.sh" ]; then
+            case "$TEST_TYPE" in
+                unit)
+                    echo "🔬 Running unit tests with MSW API mocking..."
+                    ./test.sh unit
+                    ;;
+                simulation)
+                    echo "🎯 Running API simulation tests..."
+                    ./test.sh simulation
+                    ;;
+                validation)
+                    echo "✅ Running validation tests..."
+                    ./test.sh validation
+                    ;;
+                api-contract)
+                    echo "📋 Running API contract tests with MSW..."
+                    ./test.sh api-contract
+                    ;;
+                coverage)
+                    echo "📊 Running tests with coverage..."
+                    ./test.sh coverage
+                    ;;
+                all)
+                    echo "🚀 Running all tests (unit + simulation + validation)..."
+                    ./test.sh unit
+                    ./test.sh simulation
+                    ./test.sh validation
+                    ;;
+                "")
+                    echo "🧪 Running default tests (unit + validation)..."
+                    ./test.sh unit
+                    ./test.sh validation
+                    ;;
+                *)
+                    echo "❌ Unknown test type: $TEST_TYPE"
+                    echo "   Available types: unit, simulation, validation, api-contract, coverage, all"
+                    exit 1
+                    ;;
+            esac
+        else
+            echo "❌ Test script not found at ./test.sh"
+            echo "   Using fallback npm test command..."
+            npm run test
+        fi
         ;;
     start)
         echo "🚀 Starting Estopia Frontend..."
