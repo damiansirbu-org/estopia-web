@@ -11,5 +11,17 @@ export default defineConfig({
   preview: {
     port: 3000,
     host: '0.0.0.0'
+  },
+  build: {
+    // Ensure assets are properly hashed and served
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        // Consistent asset naming for cache busting
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
+      }
+    }
   }
 })
