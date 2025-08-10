@@ -1,0 +1,172 @@
+{
+  "button": {
+    "add": {
+      "client": "Adaugă Client",
+      "asset": "Adaugă Proprietate",
+      "contract": "Adaugă Contract",
+      "payment": "Adaugă Plată"
+    },
+    "edit": "Editează",
+    "save": "Salvează",
+    "cancel": "Anulează", 
+    "delete": "Șterge",
+    "search": "Caută",
+    "reset": "Resetează",
+    "close": "Închide",
+    "copy": "Copiază",
+    "clear": "Curăță"
+  },
+  "label": {
+    "form": {
+      "name": "Nume",
+      "phoneNumber": "Telefon",
+      "email": "Email",
+      "nationalId": "CNP",
+      "address": "Adresă",
+      "description": "Descriere",
+      "surfaceArea": "Suprafață",
+      "roomCount": "Numărul de camere",
+      "bathroomCount": "Numărul de băi",
+      "floor": "Etaj",
+      "assetType": "Tipul proprietății",
+      "constructionYear": "Anul construcției",
+      "hasBalcony": "Are balcon",
+      "hasParking": "Are parcare",
+      "hasElevator": "Are lift",
+      "clientId": "Client",
+      "assetId": "Proprietate",
+      "startDate": "Data început",
+      "endDate": "Data sfârșit",
+      "rentAmount": "Suma chirie",
+      "amountDeposit": "Suma depozit",
+      "amountInvestment": "Suma investiție",
+      "isActive": "Activ",
+      "notes": "Note",
+      "dueDate": "Data scadență",
+      "amountRent": "Suma chirie",
+      "amountMaintenance": "Suma întreținere",
+      "amountNaturalGas": "Suma gaz natural",
+      "amountElectricity": "Suma electricitate",
+      "amountWater": "Suma apă",
+      "amountOther": "Suma altele",
+      "amountTotal": "Suma totală",
+      "amountPaid": "Suma plătită",
+      "paymentDate": "Data plății"
+    }
+  },
+  "validation": {
+    "client": {
+      "name": {
+        "required": "Numele clientului este obligatoriu"
+      },
+      "phoneNumber": {
+        "required": "Numărul de telefon este obligatoriu",
+        "pattern": "Format telefon: +40-XXX-XXX-XXX sau 0XXXXXXXXX"
+      },
+      "email": {
+        "required": "Adresa de email este obligatorie",
+        "invalid": "Format email invalid"
+      },
+      "nationalId": {
+        "required": "CNP-ul este obligatoriu",
+        "unique": "Există deja un client cu acest CNP",
+        "pattern": "CNP-ul trebuie să aibă 13 cifre"
+      },
+      "address": {
+        "required": "Adresa este obligatorie"
+      }
+    },
+    "asset": {
+      "name": {
+        "required": "Numele proprietății este obligatoriu"
+      },
+      "address": {
+        "required": "Adresa proprietății este obligatorie"
+      },
+      "surfaceArea": {
+        "positive": "Suprafața trebuie să fie pozitivă"
+      },
+      "roomCount": {
+        "positive": "Numărul de camere trebuie să fie pozitiv"
+      },
+      "constructionYear": {
+        "range": "Anul construcției trebuie să fie între 1800 și anul curent"
+      }
+    },
+    "contract": {
+      "clientId": {
+        "required": "Clientul este obligatoriu"
+      },
+      "assetId": {
+        "required": "Proprietatea este obligatorie"
+      },
+      "startDate": {
+        "required": "Data de început este obligatorie"
+      },
+      "endDate": {
+        "required": "Data de sfârșit este obligatorie",
+        "afterStart": "Data de sfârșit trebuie să fie după data de început"
+      },
+      "rentAmount": {
+        "required": "Suma chiriei este obligatorie",
+        "positive": "Suma chiriei trebuie să fie pozitivă"
+      }
+    },
+    "payment": {
+      "assetId": {
+        "required": "Proprietatea este obligatorie"
+      },
+      "dueDate": {
+        "required": "Data scadenței este obligatorie"
+      },
+      "amountTotal": {
+        "positive": "Suma totală trebuie să fie pozitivă"
+      }
+    }
+  },
+  "message": {
+    "success": {
+      "title": "Succes",
+      "clientCreated": "Client creat cu succes",
+      "clientUpdated": "Client actualizat cu succes",
+      "clientDeleted": "Client șters cu succes", 
+      "assetCreated": "Proprietate creată cu succes",
+      "assetUpdated": "Proprietate actualizată cu succes",
+      "assetDeleted": "Proprietate ștearsă cu succes",
+      "contractCreated": "Contract creat cu succes",
+      "contractUpdated": "Contract actualizat cu succes",
+      "contractDeleted": "Contract șters cu succes",
+      "paymentCreated": "Plată creată cu succes",
+      "paymentUpdated": "Plată actualizată cu succes", 
+      "paymentDeleted": "Plată ștearsă cu succes",
+      "dataLoaded": "Date încărcate cu succes"
+    },
+    "error": {
+      "title": "Eroare",
+      "networkError": "Eroare de conexiune. Verificați conexiunea la internet.",
+      "serverError": "Eroare de server. Încercați din nou mai târziu.",
+      "unauthorized": "Vă rugăm să vă autentificați pentru a continua",
+      "forbidden": "Nu aveți permisiunea să efectuați această acțiune",
+      "notFound": "Resursa solicitată nu a fost găsită",
+      "validationFailed": "Validarea a eșuat. Verificați datele introduse.",
+      "unexpected": "A apărut o eroare neașteptată"
+    },
+    "info": {
+      "title": "Informație",
+      "loading": "Se încarcă datele...",
+      "noData": "Nu sunt date disponibile",
+      "selectItem": "Vă rugăm să selectați un element",
+      "unsavedChanges": "Aveți modificări nesalvate"
+    }
+  },
+  "section": {
+    "clients": "Clienți",
+    "assets": "Proprietăți",
+    "contracts": "Contracte", 
+    "payments": "Plăți"
+  },
+  "terminal": {
+    "noMessages": "Niciun mesaj încă",
+    "title": "Consolă"
+  }
+}

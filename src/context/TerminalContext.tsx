@@ -13,6 +13,10 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ]);
     }, []);
 
+    const success = useCallback((text: string) => push(text, 'success'), [push]);
+    const error = useCallback((text: string) => push(text, 'error'), [push]);
+    const info = useCallback((text: string) => push(text, 'info'), [push]);
+
     const clear = useCallback(() => setMessages([]), []);
 
     const copy = useCallback(() => {
@@ -21,7 +25,7 @@ export const TerminalProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, [messages]);
 
     return (
-        <TerminalContext.Provider value={{ messages, push, clear, copy }}>
+        <TerminalContext.Provider value={{ messages, push, success, error, info, clear, copy }}>
             {children}
         </TerminalContext.Provider>
     );

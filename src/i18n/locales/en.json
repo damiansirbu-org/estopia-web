@@ -1,0 +1,172 @@
+{
+  "button": {
+    "add": {
+      "client": "Add Client",
+      "asset": "Add Asset",
+      "contract": "Add Contract", 
+      "payment": "Add Payment"
+    },
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel", 
+    "delete": "Delete",
+    "search": "Search",
+    "reset": "Reset",
+    "close": "Close",
+    "copy": "Copy",
+    "clear": "Clear"
+  },
+  "label": {
+    "form": {
+      "name": "Name",
+      "phoneNumber": "Phone Number",
+      "email": "Email",
+      "nationalId": "National ID (CNP)",
+      "address": "Address",
+      "description": "Description",
+      "surfaceArea": "Surface Area",
+      "roomCount": "Room Count",
+      "bathroomCount": "Bathroom Count",
+      "floor": "Floor",
+      "assetType": "Asset Type",
+      "constructionYear": "Construction Year",
+      "hasBalcony": "Has Balcony",
+      "hasParking": "Has Parking",
+      "hasElevator": "Has Elevator",
+      "clientId": "Client",
+      "assetId": "Asset",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "rentAmount": "Rent Amount",
+      "amountDeposit": "Deposit Amount",
+      "amountInvestment": "Investment Amount",
+      "isActive": "Active",
+      "notes": "Notes",
+      "dueDate": "Due Date",
+      "amountRent": "Rent Amount",
+      "amountMaintenance": "Maintenance Amount",
+      "amountNaturalGas": "Natural Gas Amount",
+      "amountElectricity": "Electricity Amount",
+      "amountWater": "Water Amount",
+      "amountOther": "Other Amount",
+      "amountTotal": "Total Amount",
+      "amountPaid": "Paid Amount",
+      "paymentDate": "Payment Date"
+    }
+  },
+  "validation": {
+    "client": {
+      "name": {
+        "required": "Client name is required"
+      },
+      "phoneNumber": {
+        "required": "Phone number is required",
+        "pattern": "Phone format: +40-XXX-XXX-XXX or 0XXXXXXXXX"
+      },
+      "email": {
+        "required": "Email is required",
+        "invalid": "Invalid email format"
+      },
+      "nationalId": {
+        "required": "National ID (CNP) is required",
+        "unique": "A client with this National ID already exists",
+        "pattern": "National ID must be 13 digits"
+      },
+      "address": {
+        "required": "Address is required"
+      }
+    },
+    "asset": {
+      "name": {
+        "required": "Asset name is required"
+      },
+      "address": {
+        "required": "Asset address is required"
+      },
+      "surfaceArea": {
+        "positive": "Surface area must be positive"
+      },
+      "roomCount": {
+        "positive": "Room count must be positive"
+      },
+      "constructionYear": {
+        "range": "Construction year must be between 1800 and current year"
+      }
+    },
+    "contract": {
+      "clientId": {
+        "required": "Client is required"
+      },
+      "assetId": {
+        "required": "Asset is required"
+      },
+      "startDate": {
+        "required": "Start date is required"
+      },
+      "endDate": {
+        "required": "End date is required",
+        "afterStart": "End date must be after start date"
+      },
+      "rentAmount": {
+        "required": "Rent amount is required",
+        "positive": "Rent amount must be positive"
+      }
+    },
+    "payment": {
+      "assetId": {
+        "required": "Asset is required"
+      },
+      "dueDate": {
+        "required": "Due date is required"
+      },
+      "amountTotal": {
+        "positive": "Total amount must be positive"
+      }
+    }
+  },
+  "message": {
+    "success": {
+      "title": "Success",
+      "clientCreated": "Client created successfully",
+      "clientUpdated": "Client updated successfully", 
+      "clientDeleted": "Client deleted successfully",
+      "assetCreated": "Asset created successfully",
+      "assetUpdated": "Asset updated successfully",
+      "assetDeleted": "Asset deleted successfully",
+      "contractCreated": "Contract created successfully",
+      "contractUpdated": "Contract updated successfully",
+      "contractDeleted": "Contract deleted successfully",
+      "paymentCreated": "Payment created successfully",
+      "paymentUpdated": "Payment updated successfully",
+      "paymentDeleted": "Payment deleted successfully",
+      "dataLoaded": "Data loaded successfully"
+    },
+    "error": {
+      "title": "Error",
+      "networkError": "Connection error. Please check your internet connection.",
+      "serverError": "Server error occurred. Please try again later.",
+      "unauthorized": "Please log in to continue",
+      "forbidden": "You don't have permission to perform this action",
+      "notFound": "Requested resource not found",
+      "validationFailed": "Validation failed. Please check your input.",
+      "unexpected": "An unexpected error occurred"
+    },
+    "info": {
+      "title": "Information",
+      "loading": "Loading data...",
+      "noData": "No data available",
+      "selectItem": "Please select an item",
+      "unsavedChanges": "You have unsaved changes"
+    }
+  },
+  "section": {
+    "clients": "Clients",
+    "assets": "Assets", 
+    "contracts": "Contracts",
+    "payments": "Payments"
+  },
+  "terminal": {
+    "noMessages": "No messages yet",
+    "title": "Console"
+  }
+}

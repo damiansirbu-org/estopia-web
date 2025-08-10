@@ -71,13 +71,13 @@ function ThemedApp() {
     <div className="min-h-screen bg-gray-100 p-2">
       <div className="max-w-full bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden relative" style={{ margin: '0 auto', height: 'calc(100vh - 1rem)' }}>
         <ConfigProvider theme={getThemeConfig()}>
-          <ErrorProvider>
-            <TerminalProvider>
+          <TerminalProvider>
+            <ErrorProvider>
               <AppShell>
                 <AppContent />
               </AppShell>
-            </TerminalProvider>
-          </ErrorProvider>
+            </ErrorProvider>
+          </TerminalProvider>
         </ConfigProvider>
       </div>
     </div>

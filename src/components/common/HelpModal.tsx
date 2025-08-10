@@ -1,5 +1,6 @@
 import { Modal } from 'antd';
 import { X } from 'lucide-react';
+import { getVersionString, VERSION_INFO } from '../../version';
 
 interface HelpModalProps {
   visible: boolean;
@@ -63,14 +64,52 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
           </div>
         </div>
 
-        {/* Payment Specific */}
+        {/* User Interface */}
         <div>
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">Payment Features</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">Interface Tips</h3>
           <div className="space-y-2 text-sm text-gray-600">
-            <p>• <strong>Total Amount:</strong> Automatically calculated from all individual amounts</p>
-            <p>• <strong>Remaining:</strong> Shows outstanding balance in red when positive</p>
-            <p>• <strong>Paid Checkbox:</strong> Auto-fills paid amount when checked</p>
-            <p>• <strong>Auto-complete:</strong> Paid checkbox auto-checks when remaining reaches zero</p>
+            <p>• <strong>Table Editing:</strong> Double-click any row to start editing</p>
+            <p>• <strong>Tab Navigation:</strong> Use Tab to move between form fields</p>
+            <p>• <strong>Auto-save:</strong> Changes are automatically saved when valid</p>
+            <p>• <strong>Visual Feedback:</strong> Red borders indicate validation errors</p>
+            <p>• <strong>Status Indicators:</strong> Color-coded badges show record status</p>
+          </div>
+        </div>
+
+        {/* Version Information */}
+        <div className="border-t pt-4 mt-6">
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">Version Information</h3>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Version:</span>
+                <span className="font-mono text-gray-800">{VERSION_INFO.version}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Build:</span>
+                <span className="font-mono text-gray-800">{new Date(VERSION_INFO.buildDate).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric'
+                })}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Time:</span>
+                <span className="font-mono text-gray-800">{new Date(VERSION_INFO.buildDate).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Mode:</span>
+                <span className={`font-mono px-2 py-1 rounded text-xs ${VERSION_INFO.isDev ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                  {VERSION_INFO.isDev ? 'Development' : 'Production'}
+                </span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <span className="text-xs text-gray-500 font-mono">{getVersionString()}</span>
+            </div>
           </div>
         </div>
       </div>

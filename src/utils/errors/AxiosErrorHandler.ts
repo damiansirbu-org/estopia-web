@@ -17,7 +17,7 @@ declare module 'axios' {
  */
 class AxiosErrorHandler {
   private axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8081/api',
     timeout: 30000,
     headers: {
       'Content-Type': 'application/json',
@@ -122,36 +122,30 @@ class AxiosErrorHandler {
     // You can integrate with your toast system here
     
     if (error.status >= 500) {
-      // Server errors - show generic message with error ID if available
-      const message = error.errorId 
-        ? `Server error occurred. Reference ID: ${error.errorId}`
-        : 'Server error occurred. Please try again later.';
-      
-      this.showErrorToast(message, 'error');
+      // Server errors - use localized message key
+      this.showErrorToast('message.error.serverError', 'error');
     } else if (error.status === 401) {
       // Unauthorized - might want to redirect to login
-      this.showErrorToast('Please log in to continue', 'warning');
+      this.showErrorToast('message.error.unauthorized', 'warning');
       // TODO: Redirect to login page
     } else if (error.status === 403) {
       // Forbidden
-      this.showErrorToast('You don\'t have permission to perform this action', 'warning');
+      this.showErrorToast('message.error.forbidden', 'warning');
     } else if (error.status === 0) {
       // Network error
-      this.showErrorToast('Connection error. Please check your internet connection.', 'error');
+      this.showErrorToast('message.error.networkError', 'error');
     } else {
-      // Other client errors
-      this.showErrorToast(error.message, 'warning');
+      // Other client errors - use validation failed key
+      this.showErrorToast('message.error.validationFailed', 'warning');
     }
   }
 
-  private showErrorToast(message: string, type: 'error' | 'warning' | 'info') {
-    // TODO: Integrate with your toast notification system
-    // For now, just console.error
-    console.error(`[${type.toUpperCase()}] ${message}`);
+  private showErrorToast(messageKey: string, type: 'error' | 'warning' | 'info') {
+    // TODO: Route to terminal - this will be handled by ErrorProvider integration
+    console.error(`[${type.toUpperCase()}] ${messageKey}`);
     
-    // Example integration with react-toastify:
-    // import { toast } from 'react-toastify';
-    // toast[type](message);
+    // Messages should be localized keys, not hardcoded text
+    // The actual localization happens in the UI components that use these errors
   }
 
   private generateRequestId(): string {

@@ -2,6 +2,7 @@ import { CheckOutlined, CloseOutlined, MinusOutlined, PlusOutlined, SearchOutlin
 import { Button, Form, Input, Space, Spin, Table, Typography } from 'antd';
 import type { ColumnsType, FilterDropdownProps, FilterValue, SorterResult, TableCurrentDataSource, TablePaginationConfig } from 'antd/es/table/interface';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { FilterType } from '../common/ColumnFilterPopover';
 import { useTerminal } from '../../context/useTerminal';
 import { tableConfig } from '../../theme/tokens';
@@ -25,12 +26,12 @@ interface EntityListProps<T extends BaseEntity, CreateT, UpdateT> {
   formRef?: React.MutableRefObject<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-function getColumnSearchProps<T extends BaseEntity>(dataIndex: keyof T, title: string) {
+function getColumnSearchProps<T extends BaseEntity>(dataIndex: keyof T, title: string, t: (key: string) => string) {
     return {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps) => (
             <div style={createSearchDropdownStyle()}>
                 <Input
-                    placeholder={`Search ${title}`}
+                    placeholder={t('button.search') + ` ${title}`}
                     value={selectedKeys[0]}
                     onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
                     onPressEnter={() => confirm()}
@@ -45,14 +46,14 @@ function getColumnSearchProps<T extends BaseEntity>(dataIndex: keyof T, title: s
                         size="small"
                         style={createButtonGroupStyle()}
                     >
-                        Search
+                        {t('button.search')}
                     </Button>
                     <Button
                         onClick={() => clearFilters && clearFilters()}
                         size="small"
                         style={createButtonGroupStyle()}
                     >
-                        Reset
+                        {t('button.reset')}
                     </Button>
                 </Space>
             </div>
@@ -69,6 +70,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
   config,
   formRef
 }: EntityListProps<T, CreateT, UpdateT>) {
+    const { t } = useTranslation();
     const { push } = useTerminal();
     const [entities, setEntities] = useState<T[]>([]);
     const [loading, setLoading] = useState(true); // Start with true since we fetch immediately
@@ -316,7 +318,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
             key: columnConfig.key as string,
             sorter: columnConfig.sortable,
             width: columnConfig.width,
-            ...(columnConfig.searchable ? getColumnSearchProps(columnConfig.key, columnConfig.title) : {}),
+            ...(columnConfig.searchable ? getColumnSearchProps(columnConfig.key, columnConfig.title, t) : {}),
             render: (_: unknown, record: T) => {
                 const editing = isEditing(record);
                 const error = fieldErrors[record.id]?.[columnConfig.key as string];

@@ -10,6 +10,9 @@ export interface TerminalMessage {
 export interface TerminalContextValue {
     messages: TerminalMessage[];
     push: (text: string, type?: TerminalMessageType) => void;
+    success: (text: string) => void;
+    error: (text: string) => void; 
+    info: (text: string) => void;
     clear: () => void;
     copy: () => void;
 }

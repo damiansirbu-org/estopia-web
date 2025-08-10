@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Puppeteer testing artifacts
+screenshots/
+puppeteer/reports/
+test-results/
+playwright-report/
+*.png
+*.jpg
+*.jpeg

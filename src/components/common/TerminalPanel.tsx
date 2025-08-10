@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TerminalMessage } from '../../context/TerminalTypes';
 
 interface TerminalPanelProps {
@@ -9,6 +10,7 @@ interface TerminalPanelProps {
 }
 
 const TerminalPanel: React.FC<TerminalPanelProps> = ({ messages, onClear: _onClear, onCopy: _onCopy, maxMessages = 100 }) => {
+    const { t } = useTranslation();
     const panelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -49,7 +51,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({ messages, onClear: _onCle
             <div ref={panelRef} style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
                 {messages.length === 0 ? (
                     <div style={{ color: '#bbb', textAlign: 'center', marginTop: '2rem' }}>
-                        No messages yet
+                        {t('terminal.noMessages')}
                     </div>
                 ) : (
                     messages.slice(-maxMessages).map(msg => (

@@ -1,9 +1,11 @@
 import { AlertCircle, CheckCircle, Info, X } from 'lucide-react';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Notification } from '../types/models';
 import { ErrorContext } from './ErrorContext';
 import type { ErrorContextType } from './ErrorContextTypes';
+import { useTerminal } from './useTerminal';
 
 interface NotificationBannerProps {
     notification: Notification;
@@ -11,6 +13,7 @@ interface NotificationBannerProps {
 }
 
 function NotificationBanner({ notification, onClose }: NotificationBannerProps) {
+    const { t } = useTranslation();
     if (!notification) return null;
 
     const getStyles = () => {
@@ -74,8 +77,8 @@ function NotificationBanner({ notification, onClose }: NotificationBannerProps) 
                 </div>
                 <div className="ml-3">
                     <h3 className={`text-sm font-medium ${styles.title}`}>
-                        {notification.type === 'error' ? 'Error' :
-                            notification.type === 'success' ? 'Success' : 'Information'}
+                        {notification.type === 'error' ? t('message.error.title') :
+                            notification.type === 'success' ? t('message.success.title') : t('message.info.title')}
                     </h3>
                     <div className={`mt-2 text-sm ${styles.message}`}>
                         <p>{notification.message}</p>
@@ -103,18 +106,22 @@ interface ErrorProviderProps {
 export default function ErrorProvider({ children }: ErrorProviderProps) {
     const [notification, setNotification] = useState<Notification | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const terminal = useTerminal();
 
     const showError = useCallback((message: string): void => {
         setNotification({ type: 'error', message });
-    }, []);
+        terminal.error(message); // Route to terminal
+    }, [terminal]);
 
     const showSuccess = useCallback((message: string): void => {
         setNotification({ type: 'success', message });
-    }, []);
+        terminal.success(message); // Route to terminal
+    }, [terminal]);
 
     const showInfo = useCallback((message: string): void => {
         setNotification({ type: 'info', message });
-    }, []);
+        terminal.info(message); // Route to terminal
+    }, [terminal]);
 
     const clearNotification = useCallback((): void => {
         setNotification(null);
@@ -141,13 +148,13 @@ export default function ErrorProvider({ children }: ErrorProviderProps) {
             ) {
                 showError((error as { message: string }).message);
             } else {
-                showError('An unexpected error occurred');
+                showError('message.error.unexpected'); // Use localized key
             }
             throw error;
         } finally {
             setLoading(false);
         }
-    }, [showError, showSuccess, clearNotification]);
+    }, [showError, showSuccess, clearNotification, setLoading]);
 
     const value: ErrorContextType = useMemo(() => ({
         notification,
