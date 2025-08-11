@@ -1,18 +1,23 @@
 
 import { useState, useRef } from 'react';
 import { Button, Form, Input, DatePicker, Checkbox, InputNumber } from 'antd';
+import { useTranslation } from 'react-i18next';
 import EntityList from './generic/EntityList';
 import AssetSelectionModal from './common/AssetSelectionModal';
-import { paymentEntityConfig } from '../config/entities/paymentEntity';
+import { getPaymentEntityConfig } from '../config/entities/paymentEntity';
 import { contractService } from '../services/api';
 import { DATE_FORMAT, parseDate, formatDate, formatDateForApi } from '../utils/dateUtils';
 import { useTerminal } from '../context/useTerminal';
 import type { Payment, Asset } from '../types/models';
 
 export default function PaymentList() {
+  const { t } = useTranslation();
   const [assetModalVisible, setAssetModalVisible] = useState(false);
   const formRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const { push } = useTerminal();
+  
+  // Get translated payment config
+  const translatedPaymentConfig = getPaymentEntityConfig(t);
 
   const handleAssetSelect = async (asset: Asset) => {
     if (formRef.current) {
@@ -51,8 +56,8 @@ export default function PaymentList() {
 
   // Enhanced payment config with custom renderers
   const enhancedPaymentConfig = {
-    ...paymentEntityConfig,
-    columns: paymentEntityConfig.columns.map(column => {
+    ...translatedPaymentConfig,
+    columns: translatedPaymentConfig.columns.map(column => {
       if (column.key === 'assetName') {
         return {
           ...column,

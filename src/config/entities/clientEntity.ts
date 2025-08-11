@@ -1,4 +1,4 @@
-import { CLIENT_COLUMNS } from '../../constants/clientColumns';
+import { CLIENT_COLUMNS, getClientColumns } from '../../constants/clientColumns';
 import { clientService } from '../../services/api';
 import type { Client, CreateClientRequest, UpdateClientRequest } from '../../types/models';
 import type { EntityConfig, EntityService } from '../../types/entity/entityConfig';
@@ -21,7 +21,16 @@ const clientServiceAdapter: EntityService<Client, CreateClientRequest, UpdateCli
   delete: (id) => clientService.deleteClient(id),
 };
 
-// Client entity configuration
+// Client entity configuration with translation function
+export const getClientEntityConfig = (t: (key: string) => string): EntityConfig<Client, CreateClientRequest, UpdateClientRequest> => ({
+  name: 'Client',
+  pluralName: 'Clients',
+  columns: getClientColumns(t),
+  service: clientServiceAdapter,
+  createEmpty: createEmptyClient,
+});
+
+// Fallback for backward compatibility
 export const clientEntityConfig: EntityConfig<Client, CreateClientRequest, UpdateClientRequest> = {
   name: 'Client',
   pluralName: 'Clients',

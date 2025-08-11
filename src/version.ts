@@ -1,8 +1,8 @@
 // Auto-generated version info - DO NOT EDIT MANUALLY
 export const VERSION_INFO = {
   "version": "1.0.0",
-  "buildDate": "2025-08-11T07:39:07.108Z",
-  "buildTimestamp": 1754897947108,
+  "buildDate": "2025-08-11T08:44:33.134Z",
+  "buildTimestamp": 1754901873134,
   "isDev": false,
   "mode": "production"
 } as const;

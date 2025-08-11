@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FilterType } from '../common/ColumnFilterPopover';
 import { useTerminal } from '../../context/useTerminal';
+import { useAuth } from '../../contexts/AuthContext';
 import { tableConfig } from '../../theme/tokens';
 import {
   createActionButtonContainerStyle,
@@ -72,6 +73,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
 }: EntityListProps<T, CreateT, UpdateT>) {
     const { t } = useTranslation();
     const { push } = useTerminal();
+    const { isAdmin } = useAuth();
     const [entities, setEntities] = useState<T[]>([]);
     const [loading, setLoading] = useState(true); // Start with true since we fetch immediately
     const [sortField, setSortField] = useState<string | undefined>(undefined);
@@ -287,10 +289,11 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
 
     // Simple row click handler for editing
     const handleRowClick = useCallback((record: T) => {
-        if (editingKey === null) {
+        // Only allow editing for admins
+        if (editingKey === null && isAdmin()) {
             edit(record);
         }
-    }, [editingKey, edit]);
+    }, [editingKey, edit, isAdmin]);
 
     // Single change detection function for the whole form
     const triggerChangeDetection = useCallback(() => {
@@ -415,6 +418,11 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
 
     // Render action buttons based on current state
     const renderActionButtons = () => {
+        // Only show action buttons for admins
+        if (!isAdmin()) {
+            return null;
+        }
+        
         if (!editingRecord) {
             // No record being edited - show Add button (PLUS)
             return (
@@ -578,7 +586,7 @@ export default function EntityList<T extends BaseEntity, CreateT, UpdateT>({
                                     Object.assign(target.style, rowStyle);
                                 } : undefined,
                                 style: { 
-                                    cursor: editingKey === null ? 'pointer' : 'default',
+                                    cursor: (editingKey === null && isAdmin()) ? 'pointer' : 'default',
                                     ...rowStyle
                                 }
                             };

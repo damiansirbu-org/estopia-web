@@ -1,6 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import EntityList from './generic/EntityList';
-import { clientEntityConfig } from '../config/entities/clientEntity';
+import { getClientEntityConfig } from '../config/entities/clientEntity';
 
 export default function ClientList() {
-    return <EntityList config={clientEntityConfig} />;
+    const { t } = useTranslation();
+    const translatedClientConfig = getClientEntityConfig(t);
+    
+    return <EntityList config={translatedClientConfig} />;
 }

@@ -1,18 +1,23 @@
 
 import { useState, useRef } from 'react';
 import { Button, Form, Input, DatePicker } from 'antd';
+import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import EntityList from './generic/EntityList';
 import ClientSelectionModal from './common/ClientSelectionModal';
 import AssetSelectionModal from './common/AssetSelectionModal';
-import { contractEntityConfig } from '../config/entities/contractEntity';
+import { getContractEntityConfig } from '../config/entities/contractEntity';
 import { DATE_FORMAT, parseDate, formatDate } from '../utils/dateUtils';
 import type { Contract, Client, Asset } from '../types/models';
 
 export default function ContractList() {
+  const { t } = useTranslation();
   const [clientModalVisible, setClientModalVisible] = useState(false);
   const [assetModalVisible, setAssetModalVisible] = useState(false);
   const formRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  
+  // Get translated contract config
+  const translatedContractConfig = getContractEntityConfig(t);
 
   const handleClientSelect = (client: Client) => {
     if (formRef.current) {
@@ -36,8 +41,8 @@ export default function ContractList() {
 
   // Enhanced contract config with custom renderers
   const enhancedContractConfig = {
-    ...contractEntityConfig,
-    columns: contractEntityConfig.columns.map(column => {
+    ...translatedContractConfig,
+    columns: translatedContractConfig.columns.map(column => {
       if (column.key === 'clientName') {
         return {
           ...column,

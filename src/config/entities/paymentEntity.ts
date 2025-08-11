@@ -1,4 +1,4 @@
-import { PAYMENT_COLUMNS } from '../../constants/paymentColumns';
+import { PAYMENT_COLUMNS, getPaymentColumns } from '../../constants/paymentColumns';
 import { paymentService } from '../../services/api';
 import type { Payment, CreatePaymentRequest, UpdatePaymentRequest } from '../../types/models';
 import type { EntityConfig, EntityService } from '../../types/entity/entityConfig';
@@ -31,7 +31,16 @@ const paymentServiceAdapter: EntityService<Payment, CreatePaymentRequest, Update
   delete: (id) => paymentService.deletePayment(id),
 };
 
-// Payment entity configuration
+// Payment entity configuration with translation function
+export const getPaymentEntityConfig = (t: (key: string) => string): EntityConfig<Payment, CreatePaymentRequest, UpdatePaymentRequest> => ({
+  name: 'Payment',
+  pluralName: 'Payments',
+  columns: getPaymentColumns(t),
+  service: paymentServiceAdapter,
+  createEmpty: createEmptyPayment,
+});
+
+// Fallback for backward compatibility
 export const paymentEntityConfig: EntityConfig<Payment, CreatePaymentRequest, UpdatePaymentRequest> = {
   name: 'Payment',
   pluralName: 'Payments',

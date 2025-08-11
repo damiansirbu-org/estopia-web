@@ -8,42 +8,54 @@ export interface ClientColumnConfig {
   width?: number;
 }
 
-export const CLIENT_COLUMNS: readonly ClientColumnConfig[] = [
+export const getClientColumns = (t: (key: string) => string): readonly ClientColumnConfig[] => [
   {
     key: 'name',
-    title: 'label.form.name',
+    title: t('table.name'),
     searchable: true,
     sortable: true,
     width: 200,
   },
   {
     key: 'nationalId',
-    title: 'label.form.nationalId',
+    title: t('table.nationalId'),
     searchable: true,
     sortable: true,
     width: 120,
   },
   {
     key: 'email',
-    title: 'label.form.email',
+    title: t('table.email'),
     searchable: true,
     sortable: true,
     width: 200,
   },
   {
     key: 'phoneNumber',
-    title: 'label.form.phoneNumber',
+    title: t('table.phoneNumber'),
     searchable: true,
     sortable: true,
     width: 140,
   },
   {
     key: 'address',
-    title: 'label.form.address',
+    title: t('table.address'),
     searchable: true,
     sortable: true,
     width: 200,
   },
 ] as const;
+
+// Fallback for backward compatibility
+export const CLIENT_COLUMNS: readonly ClientColumnConfig[] = getClientColumns((key: string) => {
+  const fallbacks: Record<string, string> = {
+    'table.name': 'Name',
+    'table.nationalId': 'National ID (CNP)',
+    'table.email': 'Email',
+    'table.phoneNumber': 'Phone Number',
+    'table.address': 'Address',
+  };
+  return fallbacks[key] || key;
+});
 
 export const EDITABLE_CLIENT_FIELDS = CLIENT_COLUMNS.map(col => col.key);

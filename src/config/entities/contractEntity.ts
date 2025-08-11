@@ -1,4 +1,4 @@
-import { CONTRACT_COLUMNS } from '../../constants/contractColumns';
+import { CONTRACT_COLUMNS, getContractColumns } from '../../constants/contractColumns';
 import { contractService } from '../../services/api';
 import type { Contract, CreateContractRequest, UpdateContractRequest } from '../../types/models';
 import type { EntityConfig, EntityService } from '../../types/entity/entityConfig';
@@ -27,7 +27,16 @@ const contractServiceAdapter: EntityService<Contract, CreateContractRequest, Upd
   delete: (id) => contractService.deleteContract(id),
 };
 
-// Contract entity configuration
+// Contract entity configuration with translation function
+export const getContractEntityConfig = (t: (key: string) => string): EntityConfig<Contract, CreateContractRequest, UpdateContractRequest> => ({
+  name: 'Contract',
+  pluralName: 'Contracts',
+  columns: getContractColumns(t),
+  service: contractServiceAdapter,
+  createEmpty: createEmptyContract,
+});
+
+// Fallback for backward compatibility
 export const contractEntityConfig: EntityConfig<Contract, CreateContractRequest, UpdateContractRequest> = {
   name: 'Contract',
   pluralName: 'Contracts',

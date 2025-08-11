@@ -93,14 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('auth_user', JSON.stringify(userData));
 
-        if (data.mustResetPassword) {
-          terminal.warn('🔐 Password Reset Required');
-          terminal.info('→ Go to Settings → Security tab to reset your password');
-          terminal.info('→ Your current password is: "password123"');
-          terminal.info('→ You must change it before accessing other features');
-        } else {
-          terminal.success(`Welcome back, ${data.fullName}!`);
-        }
+        terminal.success(`Welcome back, ${data.fullName}!`);
       } else {
         throw new Error('Invalid response from server');
       }
