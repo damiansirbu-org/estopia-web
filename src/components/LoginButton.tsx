@@ -50,7 +50,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
           terminal.info('✅ Password reset required - you can set a new password directly.');
           setResetStep('password');
         } else {
-          terminal.warn('⚠️ Contact admin for password reset assistance.');
+          terminal.info('⚠️ Contact admin for password reset assistance.');
         }
       } else {
         const errorData = await response.json();
