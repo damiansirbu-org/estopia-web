@@ -7,11 +7,14 @@ import type {
   CreateClientRequest,
   CreateContractRequest,
   CreatePaymentRequest,
+  CreateUserRequest,
   Payment,
   UpdateAssetRequest,
   UpdateClientRequest,
   UpdateContractRequest,
-  UpdatePaymentRequest
+  UpdatePaymentRequest,
+  UpdateUserRequest,
+  User
 } from '../types/models';
 import { apiClient } from '../utils/ErrorHandler';
 
@@ -233,5 +236,57 @@ export const paymentService = {
 
   async deletePayment(id: number): Promise<void> {
     await apiClient.delete(`/payments/${id}`);
+  }
+};
+
+// User API Service
+export const userService = {
+  async getAllUsers(params?: { filters?: Record<string, { type: FilterType, value: string }>, sortField?: string, sortDirection?: 'asc' | 'desc' }): Promise<User[]> {
+    try {
+      if (params && params.filters && Object.keys(params.filters).length > 0) {
+        // Use POST /api/users/filter for filtering
+        const filterDTO = { filters: params.filters };
+        // Build query string for sort params
+        const query: string[] = [];
+        if (params.sortField) query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+        if (params.sortDirection) query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+        const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+        const response = await apiClient.post(`/users/filter${queryString}`, filterDTO);
+        return extractData<User[]>(response);
+      } else {
+        // No filters: use GET /api/users with optional sort params
+        const query: string[] = [];
+        if (params?.sortField) {
+          query.push(`sortField=${encodeURIComponent(params.sortField)}`);
+        }
+        if (params?.sortDirection) {
+          query.push(`sortDirection=${encodeURIComponent(params.sortDirection)}`);
+        }
+        const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+        const response = await apiClient.get(`/users${queryString}`);
+        return extractData<User[]>(response);
+      }
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getUserById(id: number): Promise<User> {
+    const response = await apiClient.get(`/users/${id}`);
+    return extractData<User>(response);
+  },
+
+  async createUser(user: CreateUserRequest): Promise<User> {
+    const response = await apiClient.post('/users', user);
+    return extractData<User>(response);
+  },
+
+  async updateUser(id: number, user: UpdateUserRequest): Promise<User> {
+    const response = await apiClient.put(`/users/${id}`, user);
+    return extractData<User>(response);
+  },
+
+  async deleteUser(id: number): Promise<void> {
+    await apiClient.delete(`/users/${id}`);
   }
 };

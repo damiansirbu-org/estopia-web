@@ -68,6 +68,20 @@ export interface Payment {
   updatedAt?: string;
 }
 
+export interface User {
+  id: number;
+  username: string;
+  email?: string;
+  fullName: string;
+  role: 'ADMIN' | 'USER';
+  clientId?: number;
+  clientName?: string; // For display purposes
+  isActive?: boolean;
+  mustResetPassword: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Filter DTOs for advanced filtering (matching backend)
 export interface ClientFilterDTO {
   include?: Partial<Client>;
@@ -87,6 +101,11 @@ export interface ContractFilterDTO {
 export interface PaymentFilterDTO {
   include?: Partial<Payment>;
   exclude?: Partial<Payment>;
+}
+
+export interface UserFilterDTO {
+  include?: Partial<User>;
+  exclude?: Partial<User>;
 }
 
 // API Response types
@@ -116,6 +135,9 @@ export type UpdateContractRequest = Omit<Contract, 'id' | 'createdAt' | 'updated
 
 export type CreatePaymentRequest = Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdatePaymentRequest = Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type CreateUserRequest = Omit<User, 'id' | 'createdAt' | 'updatedAt'> & { password: string };
+export type UpdateUserRequest = Omit<User, 'id' | 'createdAt' | 'updatedAt'> & { password?: string };
 
 // Notification types
 export type NotificationType = 'error' | 'success' | 'info';

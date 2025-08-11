@@ -1,19 +1,24 @@
 import { useRef } from 'react';
 import { Form, Select, DatePicker } from 'antd';
+import { useTranslation } from 'react-i18next';
 import EntityList from './generic/EntityList';
-import { assetEntityConfig } from '../config/entities/assetEntity';
+import { assetEntityConfig, getAssetEntityConfig } from '../config/entities/assetEntity';
 import { DATE_FORMAT, parseDate, formatDate } from '../utils/dateUtils';
 import type { Asset } from '../types/models';
 
 const { Option } = Select;
 
 export default function AssetList() {
+  const { t } = useTranslation();
   const formRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  
+  // Get translated asset config
+  const translatedAssetConfig = getAssetEntityConfig(t);
   
   // Enhanced asset config with custom renderers
   const enhancedAssetConfig = {
-    ...assetEntityConfig,
-    columns: assetEntityConfig.columns.map(column => {
+    ...translatedAssetConfig,
+    columns: translatedAssetConfig.columns.map(column => {
       if (column.key === 'assetType') {
         return {
           ...column,

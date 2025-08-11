@@ -1,4 +1,4 @@
-import { ASSET_COLUMNS } from '../../constants/assetColumns';
+import { ASSET_COLUMNS, getAssetColumns } from '../../constants/assetColumns';
 import { assetService } from '../../services/api';
 import type { Asset, CreateAssetRequest, UpdateAssetRequest } from '../../types/models';
 import type { EntityConfig, EntityService } from '../../types/entity/entityConfig';
@@ -29,6 +29,15 @@ const assetServiceAdapter: EntityService<Asset, CreateAssetRequest, UpdateAssetR
 };
 
 // Asset entity configuration
+export const getAssetEntityConfig = (t: (key: string) => string): EntityConfig<Asset, CreateAssetRequest, UpdateAssetRequest> => ({
+  name: 'Asset',
+  pluralName: 'Assets',
+  columns: getAssetColumns(t),
+  service: assetServiceAdapter,
+  createEmpty: createEmptyAsset,
+});
+
+// Fallback for backward compatibility
 export const assetEntityConfig: EntityConfig<Asset, CreateAssetRequest, UpdateAssetRequest> = {
   name: 'Asset',
   pluralName: 'Assets',

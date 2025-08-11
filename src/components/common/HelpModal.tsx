@@ -1,5 +1,6 @@
 import { Modal } from 'antd';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getVersionString, VERSION_INFO } from '../../version';
 
 interface HelpModalProps {
@@ -8,9 +9,11 @@ interface HelpModalProps {
 }
 
 export default function HelpModal({ visible, onClose }: HelpModalProps) {
+  const { t } = useTranslation();
+  
   return (
     <Modal
-      title="Keyboard Shortcuts & Help"
+      title={t('help.title')}
       open={visible}
       onCancel={onClose}
       footer={null}
@@ -20,22 +23,22 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
       <div className="space-y-6">
         {/* Entity Management Shortcuts */}
         <div>
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">Entity Management</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">{t('help.entityManagement')}</h3>
           <div className="space-y-2">
             <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-              <span className="text-gray-700">Add new record</span>
+              <span className="text-gray-700">{t('help.addRecord')}</span>
               <kbd className="px-2 py-1 bg-gray-200 text-gray-800 rounded font-mono text-sm">+</kbd>
             </div>
             <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-              <span className="text-gray-700">Delete record</span>
+              <span className="text-gray-700">{t('help.deleteRecord')}</span>
               <kbd className="px-2 py-1 bg-gray-200 text-gray-800 rounded font-mono text-sm">-</kbd>
             </div>
             <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-              <span className="text-gray-700">Save changes / Confirm action</span>
+              <span className="text-gray-700">{t('help.saveChanges')}</span>
               <kbd className="px-2 py-1 bg-gray-200 text-gray-800 rounded font-mono text-sm">Enter</kbd>
             </div>
             <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-              <span className="text-gray-700">Cancel editing</span>
+              <span className="text-gray-700">{t('help.cancelEditing')}</span>
               <kbd className="px-2 py-1 bg-gray-200 text-gray-800 rounded font-mono text-sm">Escape</kbd>
             </div>
           </div>
@@ -43,18 +46,18 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
 
         {/* Navigation */}
         <div>
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">Navigation</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">{t('help.navigation')}</h3>
           <div className="space-y-2">
             <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-              <span className="text-gray-700">Edit record</span>
-              <span className="text-gray-600 text-sm">Double-click on any row</span>
+              <span className="text-gray-700">{t('help.editRecord')}</span>
+              <span className="text-gray-600 text-sm">{t('help.doubleClick')}</span>
             </div>
           </div>
         </div>
 
         {/* Usage Notes */}
         <div>
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">Usage Notes</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">{t('help.usageNotes')}</h3>
           <div className="space-y-2 text-sm text-gray-600">
             <p>• Keyboard shortcuts work when not typing in input fields</p>
             <p>• Add (+) only works when no record is being edited</p>
@@ -66,7 +69,7 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
 
         {/* User Interface */}
         <div>
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">Interface Tips</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">{t('help.interfaceTips')}</h3>
           <div className="space-y-2 text-sm text-gray-600">
             <p>• <strong>Table Editing:</strong> Double-click any row to start editing</p>
             <p>• <strong>Tab Navigation:</strong> Use Tab to move between form fields</p>
@@ -78,15 +81,15 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
 
         {/* Version Information */}
         <div className="border-t pt-4 mt-6">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800">Version Information</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-800">{t('help.version')}</h3>
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Version:</span>
+                <span className="text-gray-600">{t('status.version')}:</span>
                 <span className="font-mono text-gray-800">{VERSION_INFO.version}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Build:</span>
+                <span className="text-gray-600">{t('status.build')}:</span>
                 <span className="font-mono text-gray-800">{new Date(VERSION_INFO.buildDate).toLocaleDateString('en-US', { 
                   year: 'numeric', 
                   month: 'short', 
@@ -94,16 +97,16 @@ export default function HelpModal({ visible, onClose }: HelpModalProps) {
                 })}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Time:</span>
+                <span className="text-gray-600">{t('status.time')}:</span>
                 <span className="font-mono text-gray-800">{new Date(VERSION_INFO.buildDate).toLocaleTimeString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Mode:</span>
+                <span className="text-gray-600">{t('status.mode')}:</span>
                 <span className={`font-mono px-2 py-1 rounded text-xs ${VERSION_INFO.isDev ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                  {VERSION_INFO.isDev ? 'Development' : 'Production'}
+                  {VERSION_INFO.isDev ? t('status.development') : t('status.production')}
                 </span>
               </div>
             </div>

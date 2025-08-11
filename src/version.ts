@@ -1,18 +1,11 @@
 // Auto-generated version info - DO NOT EDIT MANUALLY
-const getBuildInfo = () => {
-  const isDev = import.meta.env.DEV;
-  const now = new Date();
-  
-  return {
-    version: '1.0.0',
-    buildDate: isDev ? now.toISOString() : '2025-08-10T15:35:38.156Z',
-    buildTimestamp: isDev ? now.getTime() : 1754840138157,
-    isDev,
-    mode: import.meta.env.MODE
-  };
-};
-
-export const VERSION_INFO = getBuildInfo();
+export const VERSION_INFO = {
+  "version": "1.0.0",
+  "buildDate": "2025-08-10T22:45:01.747Z",
+  "buildTimestamp": 1754865901747,
+  "isDev": false,
+  "mode": "production"
+} as const;
 
 export const getVersionString = (): string => {
   const date = new Date(VERSION_INFO.buildDate);

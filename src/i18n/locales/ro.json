@@ -168,5 +168,34 @@
   "terminal": {
     "noMessages": "Niciun mesaj încă",
     "title": "Consolă"
+  },
+  "nav": {
+    "dashboard": "Tablou de Bord",
+    "assets": "Proprietăți", 
+    "clients": "Clienți",
+    "contracts": "Contracte",
+    "payments": "Plăți",
+    "users": "Utilizatori",
+    "settings": "Setări",
+    "help": "Ajutor"
+  },
+  "auth": {
+    "login": "Autentificare",
+    "logout": "Deconectare",
+    "loginToEstopia": "Autentificare în Estopia"
+  },
+  "role": {
+    "admin": "Administrator",
+    "user": "Utilizator"
+  },
+  "login": {
+    "username": "Nume utilizator",
+    "password": "Parolă",
+    "usernameRequired": "Vă rugăm să introduceți numele de utilizator",
+    "passwordRequired": "Vă rugăm să introduceți parola",
+    "usernamePlaceholder": "Introduceți numele de utilizator",
+    "passwordPlaceholder": "Introduceți parola",
+    "signIn": "Conectează-te",
+    "forgotPassword": "Contactați administratorul pentru resetarea parolei"
   }
 }

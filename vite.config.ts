@@ -46,6 +46,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0', // Allow external connections
+    strictPort: true, // Fail if port is in use instead of trying another
   },
   preview: {
     port: 3000,

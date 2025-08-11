@@ -6,15 +6,18 @@ import TerminalPanel from './components/common/TerminalPanel';
 import ContractList from './components/ContractList';
 import Header from './components/Header';
 import PaymentList from './components/PaymentList';
+import UserList from './components/UserList';
 import ErrorProvider from './context/ErrorProvider';
 import { TerminalProvider } from './context/TerminalContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useTheme } from './hooks/useTheme';
 import { useTerminal } from './context/useTerminal';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 
 function AppContent() {
+  const { isLoggedIn } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const renderContent = () => {
@@ -29,6 +32,8 @@ function AppContent() {
         return <ContractList />;
       case 'payments':
         return <PaymentList />;
+      case 'users':
+        return <UserList />;
       case 'settings':
         return <Settings />;
       default:
@@ -39,23 +44,26 @@ function AppContent() {
   return (
     <div className="flex flex-col h-full">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="flex-1 overflow-hidden" style={{ 
-        margin: '0.5rem',
-        marginBottom: '23.5vh', // Space for console (22vh) + gap
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        {renderContent()}
-      </main>
+      {isLoggedIn() && (
+        <main className="flex-1 overflow-hidden" style={{ 
+          margin: '0.5rem',
+          marginBottom: '23.5vh', // Space for console (22vh) + gap
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          {renderContent()}
+        </main>
+      )}
     </div>
   );
 }
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const { messages, clear, copy } = useTerminal();
+  const { isLoggedIn } = useAuth();
   return (
     <>
       {children}
@@ -71,13 +79,11 @@ function ThemedApp() {
     <div className="min-h-screen bg-gray-100 p-2">
       <div className="max-w-full bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden relative" style={{ margin: '0 auto', height: 'calc(100vh - 1rem)' }}>
         <ConfigProvider theme={getThemeConfig()}>
-          <TerminalProvider>
-            <ErrorProvider>
-              <AppShell>
-                <AppContent />
-              </AppShell>
-            </ErrorProvider>
-          </TerminalProvider>
+          <ErrorProvider>
+            <AppShell>
+              <AppContent />
+            </AppShell>
+          </ErrorProvider>
         </ConfigProvider>
       </div>
     </div>
@@ -87,7 +93,11 @@ function ThemedApp() {
 function App() {
   return (
     <ThemeProvider>
-      <ThemedApp />
+      <TerminalProvider>
+        <AuthProvider>
+          <ThemedApp />
+        </AuthProvider>
+      </TerminalProvider>
     </ThemeProvider>
   );
 }

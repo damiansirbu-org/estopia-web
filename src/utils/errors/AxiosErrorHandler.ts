@@ -17,7 +17,7 @@ declare module 'axios' {
  */
 class AxiosErrorHandler {
   private axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8081/api',
+    baseURL: import.meta.env.VITE_API_URL || '/api',
     timeout: 30000,
     headers: {
       'Content-Type': 'application/json',
@@ -34,6 +34,12 @@ class AxiosErrorHandler {
       (config: InternalAxiosRequestConfig) => {
         // Add request ID for tracking
         config.headers['X-Request-ID'] = this.generateRequestId();
+        
+        // Add Authorization header if token exists
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
         
         // Log outgoing requests in development
         if (import.meta.env.DEV) {

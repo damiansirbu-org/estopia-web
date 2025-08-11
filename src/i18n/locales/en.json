@@ -168,5 +168,34 @@
   "terminal": {
     "noMessages": "No messages yet",
     "title": "Console"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "assets": "Assets", 
+    "clients": "Clients",
+    "contracts": "Contracts",
+    "payments": "Payments",
+    "users": "Users",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "loginToEstopia": "Login to Estopia"
+  },
+  "role": {
+    "admin": "Administrator",
+    "user": "User"
+  },
+  "login": {
+    "username": "Username",
+    "password": "Password",
+    "usernameRequired": "Please enter your username",
+    "passwordRequired": "Please enter your password",
+    "usernamePlaceholder": "Enter your username",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "forgotPassword": "Contact admin for password reset"
   }
 }
