@@ -51,6 +51,8 @@
       "amountOther": "Suma altele",
       "amountTotal": "Suma totală",
       "amountPaid": "Suma plătită",
+      "amountRemaining": "Suma rămasă",
+      "isPaid": "Plătit",
       "paymentDate": "Data plății"
     }
   },
