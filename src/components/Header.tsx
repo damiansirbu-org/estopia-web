@@ -37,9 +37,8 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
     <header className="bg-gray-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-16">
-          {/* Left side - Empty space or spacer */}
+          {/* Center everything */}
           <div className="flex-1">
-            {/* Navigation Tabs - Only show if logged in */}
             {isLoggedIn() && (
               <nav className="flex space-x-8 justify-center">
                 {tabs.map((tab) => {
@@ -58,17 +57,9 @@ function Header({ activeTab, setActiveTab }: HeaderProps) {
                     </button>
                   );
                 })}
+                <LoginButton setActiveTab={setActiveTab} />
               </nav>
             )}
-          </div>
-
-          {/* Right side - Fixed position for Login/User + Logo */}
-          <div className="flex items-center space-x-2">
-            <LoginButton setActiveTab={setActiveTab} />
-            {/* Logo - rightmost */}
-            <div className="flex flex-col items-end">
-              <h1 className="text-2xl text-white tracking-widest" style={{ fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>ESTOPIA</h1>
-            </div>
           </div>
         </div>
       </div>

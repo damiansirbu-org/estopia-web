@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useTerminal } from '../context/useTerminal';
+import { apiClient } from '../utils/errors/AxiosErrorHandler';
 
 interface User {
   id?: number;
@@ -8,7 +9,7 @@ interface User {
   fullName: string;
   role: 'ADMIN' | 'USER';
   clientId?: number;
-  mustResetPassword?: boolean;
+  mustEnroll?: boolean;
 }
 
 interface AuthContextType {
@@ -83,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           fullName: data.fullName,
           role: data.role,
           clientId: data.clientId,
-          mustResetPassword: data.mustResetPassword,
+          mustEnroll: data.mustEnroll,
         };
 
         setToken(data.token);
@@ -113,6 +114,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('auth_user');
     terminal.info('You have been logged out');
   };
+
+  // Set up automatic logout on 401 errors
+  useEffect(() => {
+    apiClient.setLogoutHandler(logout);
+  }, []);
 
   const isAdmin = () => {
     return user?.role === 'ADMIN';

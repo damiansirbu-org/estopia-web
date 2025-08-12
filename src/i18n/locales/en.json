@@ -196,6 +196,8 @@
     "usernamePlaceholder": "Enter your username",
     "passwordPlaceholder": "Enter your password",
     "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "subtitle": "Property Management System",
     "forgotPassword": "Contact admin for password reset"
   }
 }

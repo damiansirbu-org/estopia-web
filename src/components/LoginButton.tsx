@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Form, Input, Space, Avatar, Dropdown, Typography, Popover, Card, message } from 'antd';
+import { Button, Modal, Form, Input, Space, Avatar, Dropdown, Typography, Popover, Card, message, Tooltip } from 'antd';
 import { UserOutlined, LoginOutlined, LogoutOutlined, SettingOutlined, LockOutlined, QuestionCircleOutlined, TeamOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
@@ -22,7 +22,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
   const [helpVisible, setHelpVisible] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetUsername, setResetUsername] = useState('');
-  const [mustResetPassword, setMustResetPassword] = useState(false);
+  const [mustEnroll, setMustEnroll] = useState(false);
   const [resetStep, setResetStep] = useState<'check' | 'password'>('check');
   const [form] = Form.useForm();
 
@@ -40,13 +40,13 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
 
   const handleResetCheck = async (values: { username: string }) => {
     try {
-      const response = await fetch(`/api/auth/check-reset/${values.username}`);
+      const response = await fetch(`/api/auth/check-enroll/${values.username}`);
       if (response.ok) {
         const data = await response.json();
         setResetUsername(values.username);
-        setMustResetPassword(data.mustResetPassword);
+        setMustEnroll(data.mustEnroll);
         
-        if (data.mustResetPassword) {
+        if (data.mustEnroll) {
           terminal.info('✅ Password reset required - you can set a new password directly.');
           setResetStep('password');
         } else {
@@ -75,7 +75,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
           'username': resetUsername,
         },
         body: JSON.stringify({
-          currentPassword: mustResetPassword ? undefined : values.currentPassword,
+          currentPassword: mustEnroll ? undefined : values.currentPassword,
           newPassword: values.newPassword,
           confirmPassword: values.confirmPassword,
         }),
@@ -272,10 +272,10 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
                   >
                     <div className="mb-3 text-xs text-gray-600">
                       User: <strong>{resetUsername}</strong>
-                      {mustResetPassword ? " (No current password needed)" : ""}
+                      {mustEnroll ? " (Enroll)" : ""}
                     </div>
                     
-                    {!mustResetPassword && (
+                    {!mustEnroll && (
                       <Form.Item
                         name="currentPassword"
                         label="Current Password"
@@ -290,15 +290,15 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
                     
                     <Form.Item
                       name="newPassword"
-                      label="New Password"
+                      label={mustEnroll ? "Password" : "New Password"}
                       rules={[
-                        { required: true, message: 'Please enter new password' },
+                        { required: true, message: mustEnroll ? 'Please enter password' : 'Please enter new password' },
                         { min: 6, message: 'Password must be at least 6 characters' }
                       ]}
                     >
                       <Input.Password
                         prefix={<LockOutlined />}
-                        placeholder="New password"
+                        placeholder={mustEnroll ? "Enter password" : "New password"}
                       />
                     </Form.Item>
                     
@@ -330,7 +330,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
                         loading={loading}
                         className="w-full bg-gradient-to-r from-green-500 to-green-600 border-0"
                       >
-                        Reset Password
+                        {mustEnroll ? "Enroll" : "Reset Password"}
                       </Button>
                     </Form.Item>
                   </Form>
@@ -347,20 +347,17 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
             setResetMode(false);
             setResetStep('check');
             setResetUsername('');
-            setMustResetPassword(false);
+            setMustEnroll(false);
             form.resetFields();
           }
         }}
         placement="bottomRight"
         overlayStyle={{ padding: 0, width: '320px' }}
       >
-        <Button
-          type="primary"
-          shape="circle"
-          icon={<LoginOutlined />}
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 border-0 w-8 h-8 flex items-center justify-center"
-          size="middle"
-        />
+        <button className="flex items-center px-4 py-3 rounded-md text-base font-medium transition-colors text-gray-300 hover:bg-gray-600 hover:text-white">
+          <LoginOutlined className="h-5 w-5 mr-3" />
+          {t('auth.login', 'Login')}
+        </button>
       </Popover>
     );
   }
@@ -373,14 +370,10 @@ const LoginButton: React.FC<LoginButtonProps> = ({ setActiveTab }) => {
         placement="bottomRight"
         arrow
       >
-        <Space className="cursor-pointer hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
-          <Avatar 
-            size={32} 
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm"
-          >
-            {user?.role === 'ADMIN' ? 'SA' : 'U'}
-          </Avatar>
-        </Space>
+        <button className="flex items-center px-4 py-3 rounded-md text-base font-medium transition-colors text-gray-300 hover:bg-gray-600 hover:text-white">
+          <UserOutlined className="h-5 w-5 mr-3" />
+          {user?.role === 'ADMIN' ? 'Admin' : 'User'}
+        </button>
       </Dropdown>
       <HelpModal visible={helpVisible} onClose={() => setHelpVisible(false)} />
     </>

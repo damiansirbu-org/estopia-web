@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Form, Select } from 'antd';
+import { Checkbox, Form, Select, Input } from 'antd';
 import type { User } from '../types/models';
 import ClientSelector from '../components/ClientSelector';
 
@@ -23,13 +23,6 @@ export const USER_COLUMNS: readonly UserColumnConfig[] = [
   {
     key: 'fullName',
     title: 'Full Name',
-    searchable: true,
-    sortable: true,
-    width: 200,
-  },
-  {
-    key: 'email',
-    title: 'Email',
     searchable: true,
     sortable: true,
     width: 200,
@@ -89,18 +82,18 @@ export const USER_COLUMNS: readonly UserColumnConfig[] = [
     },
   },
   {
-    key: 'mustResetPassword',
-    title: 'Reset Password',
+    key: 'mustEnroll',
+    title: 'Enroll',
     searchable: false,
     sortable: true,
     width: 120,
     customRenderer: (record: User, editing: boolean, fieldErrors?: Record<string, string>, triggerChangeDetection?: () => void) => {
-      const error = fieldErrors?.['mustResetPassword'];
+      const error = fieldErrors?.['mustEnroll'];
       
       if (editing) {
         return (
           <Form.Item
-            name="mustResetPassword"
+            name="mustEnroll"
             style={{ margin: 0 }}
             validateStatus={error ? 'error' : ''}
             help={error}
@@ -112,7 +105,7 @@ export const USER_COLUMNS: readonly UserColumnConfig[] = [
           </Form.Item>
         );
       }
-      return record.mustResetPassword ? 'Yes' : 'No';
+      return record.mustEnroll ? 'Yes' : 'No';
     },
   },
   {

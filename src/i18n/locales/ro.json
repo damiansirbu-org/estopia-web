@@ -198,6 +198,8 @@
     "usernamePlaceholder": "Introduceți numele de utilizator",
     "passwordPlaceholder": "Introduceți parola",
     "signIn": "Conectează-te",
+    "signingIn": "Se conectează...",
+    "subtitle": "Sistem de Management Proprietăți",
     "forgotPassword": "Contactați administratorul pentru resetarea parolei"
   }
 }

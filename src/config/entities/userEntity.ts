@@ -7,13 +7,12 @@ import type { EntityConfig, EntityService } from '../../types/entity/entityConfi
 const createEmptyUser = (): User => ({
   id: 0, // This will be overridden with negative ID in EntityList
   username: '',
-  email: '',
   fullName: '',
   role: 'USER',
   clientId: undefined,
   clientName: undefined,
   isActive: true,
-  mustResetPassword: false,
+  mustEnroll: false,
 });
 
 // Adapter to make userService compatible with EntityService interface

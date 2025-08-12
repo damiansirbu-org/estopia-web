@@ -71,13 +71,12 @@ export interface Payment {
 export interface User {
   id: number;
   username: string;
-  email?: string;
   fullName: string;
   role: 'ADMIN' | 'USER';
   clientId?: number;
   clientName?: string; // For display purposes
   isActive?: boolean;
-  mustResetPassword: boolean;
+  mustEnroll: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

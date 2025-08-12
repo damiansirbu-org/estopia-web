@@ -24,9 +24,16 @@ class AxiosErrorHandler {
     },
   });
 
+  private logoutHandler: (() => void) | null = null;
+
   constructor() {
     this.setupRequestInterceptor();
     this.setupResponseInterceptor();
+  }
+
+  // Method to set logout handler from AuthContext
+  setLogoutHandler(logoutHandler: () => void) {
+    this.logoutHandler = logoutHandler;
   }
 
   private setupRequestInterceptor() {
@@ -131,9 +138,12 @@ class AxiosErrorHandler {
       // Server errors - use localized message key
       this.showErrorToast('message.error.serverError', 'error');
     } else if (error.status === 401) {
-      // Unauthorized - might want to redirect to login
+      // Unauthorized - token expired or invalid
       this.showErrorToast('message.error.unauthorized', 'warning');
-      // TODO: Redirect to login page
+      // Trigger logout to clear expired token and reset auth state
+      if (this.logoutHandler) {
+        this.logoutHandler();
+      }
     } else if (error.status === 403) {
       // Forbidden
       this.showErrorToast('message.error.forbidden', 'warning');

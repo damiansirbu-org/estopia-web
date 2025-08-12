@@ -16,6 +16,7 @@ interface ResetPasswordData {
   currentPassword?: string;
   newPassword: string;
   confirmPassword: string;
+  error?: string;
 }
 
 interface LoginProps {
@@ -32,7 +33,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
   const [resetForm] = Form.useForm();
   const [mode, setMode] = useState<'login' | 'reset' | 'reset-form'>('login');
   const [resetUsername, setResetUsername] = useState('');
-  const [mustResetPassword, setMustResetPassword] = useState(false);
+  const [mustEnroll, setMustEnroll] = useState(false);
 
   const handleLogin = (values: LoginFormData) => {
     onLogin({
@@ -43,24 +44,27 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
 
   const handleResetStart = async (values: { username: string }) => {
     try {
-      const response = await fetch(`/api/auth/check-reset/${values.username}`);
+      const response = await fetch(`/api/auth/check-enroll/${values.username}`);
       if (response.ok) {
         const data = await response.json();
         setResetUsername(values.username);
-        setMustResetPassword(data.mustResetPassword);
+        setMustEnroll(data.mustEnroll);
         setMode('reset-form');
       } else {
-        // Handle error - user not found
+        const errorData = await response.json().catch(() => ({ error: 'User not found' }));
+        // Show error in parent component
+        onResetPassword({ username: values.username, newPassword: '', confirmPassword: '', error: errorData.error || 'User not found' });
       }
     } catch (error) {
       console.error('Error checking reset status:', error);
+      onResetPassword({ username: values.username, newPassword: '', confirmPassword: '', error: 'Network error. Please try again.' });
     }
   };
 
   const handleResetPassword = (values: any) => {
     onResetPassword({
       username: resetUsername,
-      currentPassword: mustResetPassword ? undefined : values.currentPassword,
+      currentPassword: mustEnroll ? undefined : values.currentPassword,
       newPassword: values.newPassword,
       confirmPassword: values.confirmPassword
     });
@@ -109,7 +113,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
             htmlType="submit"
             loading={loading}
             size="large"
-            className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+            className="w-full rounded-lg bg-gray-700 hover:bg-gray-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
             style={{ height: '48px' }}
           >
             {loading ? t('login.signingIn', 'Signing in...') : t('login.signIn', 'Sign In')}
@@ -167,7 +171,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
             type="primary"
             htmlType="submit"
             size="large"
-            className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-red-500 border-0"
+            className="w-full rounded-lg bg-gray-600 hover:bg-gray-500 border-0"
             style={{ height: '48px' }}
           >
             Check Reset Status
@@ -194,9 +198,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
         <Text strong>User: {resetUsername}</Text>
         <br />
         <Text type="secondary">
-          {mustResetPassword 
-            ? "Password reset required - no current password needed" 
-            : "Enter your current password to reset"}
+          {mustEnroll 
+            ? "Enroll - no current password needed" 
+            : "Enter your current password to change password"}
         </Text>
       </div>
 
@@ -206,7 +210,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
         layout="vertical"
         requiredMark={false}
       >
-        {!mustResetPassword && (
+        {!mustEnroll && (
           <Form.Item
             name="currentPassword"
             label={<span className="text-gray-700 font-medium">Current Password</span>}
@@ -223,15 +227,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
 
         <Form.Item
           name="newPassword"
-          label={<span className="text-gray-700 font-medium">New Password</span>}
+          label={<span className="text-gray-700 font-medium">{mustEnroll ? "Set Password" : "New Password"}</span>}
           rules={[
-            { required: true, message: 'Please enter your new password' },
+            { required: true, message: mustEnroll ? 'Please enter your password' : 'Please enter your new password' },
             { min: 6, message: 'Password must be at least 6 characters' }
           ]}
         >
           <Input.Password
             prefix={<LockOutlined className="text-gray-400" />}
-            placeholder="Enter your new password"
+            placeholder={mustEnroll ? "Enter your password" : "Enter your new password"}
             size="large"
             className="rounded-lg"
           />
@@ -266,10 +270,13 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
             htmlType="submit"
             loading={loading}
             size="large"
-            className="w-full rounded-lg bg-gradient-to-r from-green-500 to-green-600 border-0"
+            className="w-full rounded-lg bg-gray-700 hover:bg-gray-600 border-0"
             style={{ height: '48px' }}
           >
-            {loading ? 'Resetting Password...' : 'Reset Password'}
+            {loading 
+              ? (mustEnroll ? 'Enrolling...' : 'Resetting Password...')
+              : (mustEnroll ? 'Enroll' : 'Reset Password')
+            }
           </Button>
         </Form.Item>
       </Form>
@@ -319,7 +326,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <Row justify="center" align="middle" className="w-full max-w-md">
         <Col span={24}>
           <Card
@@ -331,17 +338,13 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
           >
             {/* Logo and Header */}
             <div className="text-center mb-8">
-              <div className="mb-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 mb-4">
-                  <span className="text-white font-bold text-2xl">E</span>
-                </div>
+              <div className="mb-6">
+                <h1 className="text-3xl text-gray-800 tracking-widest" style={{ fontFamily: 'Orbitron, ui-monospace, monospace', letterSpacing: '0.3em', fontWeight: '900', textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>
+                  ESTOPIA
+                </h1>
               </div>
               
-              <Title level={2} className="mb-2 text-gray-800">
-                Estopia
-              </Title>
-              
-              <Text className="text-gray-500">
+              <Text className="text-gray-500 text-lg">
                 {mode === 'login' 
                   ? t('login.subtitle', 'Property Management System')
                   : mode === 'reset' 
@@ -370,7 +373,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onResetPassword, loading = false
             {/* Footer */}
             <div className="text-center mt-8 pt-6 border-t border-gray-100">
               <Text className="text-xs text-gray-400">
-                © 2025 Estopia Property Management
+                © 2025 RationalMinds
               </Text>
             </div>
           </Card>
